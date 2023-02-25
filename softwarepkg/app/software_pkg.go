@@ -15,7 +15,7 @@ type SoftwarePkgService interface {
 
 var _ SoftwarePkgService = (*softwarePkgService)(nil)
 
-func NewSoftwarePkgService(repo repository.SoftwarePkg) *softwarePkgService {
+func NewSoftwarePkgService(repo repository.SoftwarePkg) SoftwarePkgService {
 	return &softwarePkgService{repo}
 }
 

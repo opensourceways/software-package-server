@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"io/ioutil"
 	"os"
 	"unicode/utf8"
 
@@ -9,7 +8,7 @@ import (
 )
 
 func LoadFromYaml(path string, cfg interface{}) error {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}

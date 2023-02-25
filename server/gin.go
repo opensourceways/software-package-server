@@ -13,7 +13,10 @@ import (
 
 	"github.com/opensourceways/software-package-server/config"
 	"github.com/opensourceways/software-package-server/docs"
+	"github.com/opensourceways/software-package-server/infrastructure/postgresql"
 	softwarepkgapp "github.com/opensourceways/software-package-server/softwarepkg/app"
+	"github.com/opensourceways/software-package-server/softwarepkg/controller"
+	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/repositoryimpl"
 )
 
 func StartWebServer(port int, timeout time.Duration, cfg *config.Config) {
@@ -51,7 +54,9 @@ func setApiV1(v1 *gin.RouterGroup) {
 }
 
 func initSoftwarePkgService(v1 *gin.RouterGroup) {
-	softwarepkgapp.NewSoftwarePkgService(nil)
+	controller.AddRouteForSoftwareController(v1, checkUser(), softwarepkgapp.NewSoftwarePkgService(
+		repositoryimpl.NewSoftware(postgresql.DB())))
+
 }
 
 func logRequest() gin.HandlerFunc {
@@ -69,5 +74,49 @@ func logRequest() gin.HandlerFunc {
 			c.Request.Method,
 			c.Request.RequestURI,
 		)
+	}
+}
+
+func checkUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		return
+		ut, _ := c.Cookie("_U_T_")
+		yg, _ := c.Cookie("_Y_G_")
+
+		if len(ut) == 0 || len(yg) == 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": "bad_request",
+				"msg":  "invalid cookie",
+			})
+
+			c.Abort()
+
+			return
+		}
+
+		var (
+			resp *http.Response
+			err  error
+		)
+
+		// TODO to be provided
+		resp, err = http.Post("", "application/json", nil)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			c.Next()
+		} else {
+			if err != nil {
+				logrus.Errorf("check user faild,err :%v", err)
+			}
+
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": "bad_request",
+				"msg":  "invalid user",
+			})
+
+			c.Abort()
+
+			return
+		}
 	}
 }

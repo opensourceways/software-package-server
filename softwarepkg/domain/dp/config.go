@@ -26,6 +26,6 @@ func (cfg *Config) SetDefault() {
 	}
 }
 
-func (r *Config) Validate() error {
+func (cfg *Config) Validate() error {
 	return nil
 }
