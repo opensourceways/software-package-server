@@ -6,8 +6,6 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/opensourceways/software-package-server/config"
 )
 
 var (
@@ -15,7 +13,7 @@ var (
 	db    *gorm.DB
 )
 
-func InitPostgresql(cfg *config.PostgresqlConfig) (err error) {
+func InitPostgresql(cfg *PostgresqlConfig) (err error) {
 	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Asia/Shanghai",
 		cfg.DbHost, cfg.DbUser, cfg.DbPwd, cfg.DbName, cfg.DbPort)
 	db, err = gorm.Open(postgres.New(postgres.Config{

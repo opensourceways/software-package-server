@@ -1,16 +1,17 @@
 package config
 
 import (
-	"time"
+	"errors"
 
 	"github.com/opensourceways/community-robot-lib/utils"
 
+	"github.com/opensourceways/software-package-server/infrastructure/db"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
-func LoadConfig(path string, cfg interface{}) error {
-	if err := utils.LoadFromYaml(path, cfg); err != nil {
-		return err
+func LoadConfig(path string, cfg interface{}) (err error) {
+	if err = utils.LoadFromYaml(path, cfg); err != nil {
+		return
 	}
 
 	if f, ok := cfg.(configSetDefault); ok {
@@ -18,10 +19,21 @@ func LoadConfig(path string, cfg interface{}) error {
 	}
 
 	if f, ok := cfg.(configValidate); ok {
-		if err := f.Validate(); err != nil {
-			return err
+		if err = f.Validate(); err != nil {
+			return
 		}
 	}
+
+	c, ok := cfg.(*Config)
+	if !ok {
+		return errors.New("assert config fail")
+	}
+
+	if err = db.InitPostgresql(&c.PostgresqlConfig); err != nil {
+		return
+	}
+
+	dp.Init(&c.DPConfig)
 
 	return nil
 }
@@ -35,33 +47,8 @@ type configSetDefault interface {
 }
 
 type Config struct {
-	PostgresqlConfig PostgresqlConfig `json:"db_config" required:"true"`
-	DPConfig         dp.Config        `json:"dp_config" required:"true"`
-}
-
-type PostgresqlConfig struct {
-	DbHost    string        `json:"db_host" required:"true"`
-	DbUser    string        `json:"db_user" required:"true"`
-	DbPwd     string        `json:"db_pwd"  required:"true"`
-	DbName    string        `json:"db_name" required:"true"`
-	DbPort    int           `json:"db_port" required:"true"`
-	DbMaxConn int           `json:"db_max_conn" required:"true"`
-	DbMaxIdle int           `json:"db_max_idle" required:"true"`
-	DbLife    time.Duration `json:"db_life" required:"true"`
-}
-
-func (p *PostgresqlConfig) SetDefault() {
-	if p.DbMaxConn <= 0 {
-		p.DbMaxConn = 500
-	}
-
-	if p.DbMaxIdle <= 0 {
-		p.DbMaxIdle = 250
-	}
-
-	if p.DbLife <= 0 {
-		p.DbLife = time.Minute * 2
-	}
+	PostgresqlConfig db.PostgresqlConfig `json:"db_config" required:"true"`
+	DPConfig         dp.Config           `json:"dp_config" required:"true"`
 }
 
 func (cfg *Config) configItems() []interface{} {
