@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,7 +27,7 @@ func InitPostgresql(cfg *PostgresqlConfig) (err error) {
 		return
 	}
 
-	sqlDb.SetConnMaxLifetime(cfg.DbLife)
+	sqlDb.SetConnMaxLifetime(time.Minute * time.Duration(cfg.DbLife))
 	sqlDb.SetMaxOpenConns(cfg.DbMaxConn)
 	sqlDb.SetMaxIdleConns(cfg.DbMaxIdle)
 

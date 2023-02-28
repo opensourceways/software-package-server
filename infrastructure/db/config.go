@@ -2,18 +2,17 @@ package db
 
 import (
 	"fmt"
-	"time"
 )
 
 type PostgresqlConfig struct {
-	DbHost    string        `json:"db_host" required:"true"`
-	DbUser    string        `json:"db_user" required:"true"`
-	DbPwd     string        `json:"db_pwd"  required:"true"`
-	DbName    string        `json:"db_name" required:"true"`
-	DbPort    int           `json:"db_port" required:"true"`
-	DbMaxConn int           `json:"db_max_conn" required:"true"`
-	DbMaxIdle int           `json:"db_max_idle" required:"true"`
-	DbLife    time.Duration `json:"db_life" required:"true"`
+	DbHost    string `json:"db_host"     required:"true"`
+	DbUser    string `json:"db_user"     required:"true"`
+	DbPwd     string `json:"db_pwd"      required:"true"`
+	DbName    string `json:"db_name"     required:"true"`
+	DbPort    int    `json:"db_port"     required:"true"`
+	DbMaxConn int    `json:"db_max_conn" required:"true"`
+	DbMaxIdle int    `json:"db_max_idle" required:"true"`
+	DbLife    int    `json:"db_life"     required:"true"` // DbLife value represents minutes
 }
 
 func (p *PostgresqlConfig) SetDefault() {
@@ -26,7 +25,7 @@ func (p *PostgresqlConfig) SetDefault() {
 	}
 
 	if p.DbLife <= 0 {
-		p.DbLife = time.Minute * 2
+		p.DbLife = 2
 	}
 }
 

@@ -18,11 +18,11 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	if err := db.InitPostgresql(&cfg.PostgresqlConfig); err != nil {
+	if err := db.InitPostgresql(&cfg.Postgresql); err != nil {
 		return nil, err
 	}
 
-	dp.Init(&cfg.DPConfig)
+	dp.Init(&cfg.DP)
 
 	return cfg, nil
 }
@@ -36,14 +36,14 @@ type configSetDefault interface {
 }
 
 type Config struct {
-	PostgresqlConfig db.PostgresqlConfig `json:"db_config" required:"true"`
-	DPConfig         dp.Config           `json:"dp_config" required:"true"`
+	Postgresql db.PostgresqlConfig `json:"db" required:"true"`
+	DP         dp.Config           `json:"dp" required:"true"`
 }
 
 func (cfg *Config) configItems() []interface{} {
 	return []interface{}{
-		&cfg.PostgresqlConfig,
-		&cfg.DPConfig,
+		&cfg.Postgresql,
+		&cfg.DP,
 	}
 }
 
