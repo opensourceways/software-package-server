@@ -11,9 +11,13 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/repositoryimpl"
+
+	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/config"
 	"github.com/opensourceways/software-package-server/docs"
 	softwarepkgapp "github.com/opensourceways/software-package-server/softwarepkg/app"
+	"github.com/opensourceways/software-package-server/softwarepkg/controller"
 )
 
 func StartWebServer(port int, timeout time.Duration, cfg *config.Config) {
@@ -51,7 +55,10 @@ func setApiV1(v1 *gin.RouterGroup) {
 }
 
 func initSoftwarePkgService(v1 *gin.RouterGroup) {
-	softwarepkgapp.NewSoftwarePkgService(nil)
+	softPkg := repositoryimpl.NewSoftware(postgresql.DB())
+	controller.AddRouteForSoftwareController(
+		v1, softwarepkgapp.NewSoftwarePkgService(softPkg),
+	)
 }
 
 func logRequest() gin.HandlerFunc {
