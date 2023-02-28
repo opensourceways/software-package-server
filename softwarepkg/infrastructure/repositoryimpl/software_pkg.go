@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	repositoryerr "github.com/opensourceways/software-package-server/common/domain/repository"
+	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/repository"
 )
@@ -51,13 +51,12 @@ func (s softwarePkgImpl) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error 
 
 func (s softwarePkgImpl) save(soft *SoftwarePkgDO) error {
 	query := s.db.Where(&SoftwarePkgDO{PackageName: soft.PackageName}).FirstOrCreate(soft)
-	err := query.Error
-	if err != nil {
+	if err := query.Error; err != nil {
 		return err
 	}
 
 	if query.RowsAffected == 0 {
-		return repositoryerr.NewErrorDuplicateCreating(errors.New("package name exists"))
+		return commonrepo.NewErrorDuplicateCreating(errors.New("package exists"))
 	}
 
 	return nil
