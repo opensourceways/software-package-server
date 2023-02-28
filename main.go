@@ -11,6 +11,7 @@ import (
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/config"
 	"github.com/opensourceways/software-package-server/server"
+	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
 type options struct {
@@ -60,6 +61,8 @@ func main() {
 	if err = postgresql.Init(&cfg.Postgresql); err != nil {
 		logrus.Fatalf("init db, err:%s", err.Error())
 	}
+
+	dp.Init(&cfg.SoftwarePkg)
 
 	// run
 	server.StartWebServer(o.service.Port, o.service.GracePeriod, cfg)

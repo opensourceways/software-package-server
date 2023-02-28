@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"github.com/opensourceways/software-package-server/common/controller"
+	commonctl "github.com/opensourceways/software-package-server/common/controller"
 	"github.com/opensourceways/software-package-server/softwarepkg/app"
 )
 
 type SoftwarePkgController struct {
-	controller.BaseController
+	commonctl.BaseController
 	repo app.SoftwarePkgService
 }
 
-func AddRouteForSoftwareController(r *gin.RouterGroup, repo app.SoftwarePkgService) {
+func AddRouteForSoftwarePkgController(r *gin.RouterGroup, repo app.SoftwarePkgService) {
 	ctl := SoftwarePkgController{
 		repo: repo,
 	}
@@ -32,7 +32,7 @@ func AddRouteForSoftwareController(r *gin.RouterGroup, repo app.SoftwarePkgServi
 // @Failure 400 {object} ResponseData
 // @Router /v1/softwarepkg [post]
 func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
-	var req softwareRequest
+	var req softwarePkgRequest
 	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		ctl.SendBadRequestBody(ctx, err)
 

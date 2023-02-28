@@ -18,8 +18,6 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	dp.Init(&cfg.SoftwarePkg)
-
 	return cfg, nil
 }
 

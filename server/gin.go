@@ -52,8 +52,7 @@ func setApiV1(v1 *gin.RouterGroup) {
 }
 
 func initSoftwarePkgService(v1 *gin.RouterGroup) {
-	//softPkg := repositoryimpl.NewSoftware(postgresql.DB())
-	controller.AddRouteForSoftwareController(
+	controller.AddRouteForSoftwarePkgController(
 		v1, softwarepkgapp.NewSoftwarePkgService(nil),
 	)
 }

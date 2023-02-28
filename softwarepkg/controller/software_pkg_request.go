@@ -5,7 +5,7 @@ import (
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
-type softwareRequest struct {
+type softwarePkgRequest struct {
 	SourceCodeUrl     string `json:"source_code_url"     binding:"required"`
 	SourceCodeLicense string `json:"source_code_license" binding:"required"`
 	PackageName       string `json:"package_name"        binding:"required"`
@@ -15,7 +15,7 @@ type softwareRequest struct {
 	PackageReason     string `json:"package_reason"      binding:"required"`
 }
 
-func (s softwareRequest) toCmd() (pkg app.CmdToApplyNewSoftwarePkg, err error) {
+func (s softwarePkgRequest) toCmd() (pkg app.CmdToApplyNewSoftwarePkg, err error) {
 	pkg.SourceCode.Address, err = dp.NewURL(s.SourceCodeUrl)
 	if err != nil {
 		return
