@@ -14,7 +14,7 @@ var (
 
 func InitPostgresql(cfg *PostgresqlConfig) (err error) {
 	db, err = gorm.Open(postgres.New(postgres.Config{
-		DSN:                  cfg.DSN(),
+		DSN:                  cfg.dsn(),
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}), &gorm.Config{})
 	if err != nil {

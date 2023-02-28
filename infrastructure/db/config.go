@@ -30,7 +30,9 @@ func (p *PostgresqlConfig) SetDefault() {
 	}
 }
 
-func (p *PostgresqlConfig) DSN() string {
-	return fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Asia/Shanghai",
-		p.DbHost, p.DbUser, p.DbPwd, p.DbName, p.DbPort)
+func (p *PostgresqlConfig) dsn() string {
+	return fmt.Sprintf(
+		"host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Asia/Shanghai",
+		p.DbHost, p.DbUser, p.DbPwd, p.DbName, p.DbPort,
+	)
 }
