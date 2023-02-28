@@ -23,8 +23,6 @@ definitions:
         type: string
       source_code_url:
         type: string
-      username:
-        type: string
     required:
     - package_desc
     - package_name
@@ -33,7 +31,6 @@ definitions:
     - package_sig
     - source_code_license
     - source_code_url
-    - username
     type: object
 info:
   contact: {}

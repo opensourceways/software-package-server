@@ -76,8 +76,7 @@ const docTemplate = `{
                 "package_reason",
                 "package_sig",
                 "source_code_license",
-                "source_code_url",
-                "username"
+                "source_code_url"
             ],
             "properties": {
                 "package_desc": {
@@ -99,9 +98,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source_code_url": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }

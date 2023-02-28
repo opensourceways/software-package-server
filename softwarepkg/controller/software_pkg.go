@@ -33,21 +33,20 @@ func AddRouteForSoftwareController(r *gin.RouterGroup, repo app.SoftwarePkgServi
 // @Router /v1/softwarepkg [post]
 func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 	var req softwareRequest
-
 	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		ctl.SendBadRequestBody(ctx, err)
 
 		return
 	}
 
-	pkg, user, err := req.toCmd()
+	pkg, err := req.toCmd()
 	if err != nil {
 		ctl.SendBadRequestParam(ctx, err)
 
 		return
 	}
 
-	if code, err := ctl.repo.ApplyNewPkg(user, &pkg); err != nil {
+	if code, err := ctl.repo.ApplyNewPkg(nil, &pkg); err != nil {
 		ctl.SendBadRequest(ctx, code, err)
 	} else {
 		ctl.SendCreateSuccess(ctx)
