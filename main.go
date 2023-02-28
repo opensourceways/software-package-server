@@ -9,7 +9,9 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/software-package-server/config"
+	"github.com/opensourceways/software-package-server/infrastructure/db"
 	"github.com/opensourceways/software-package-server/server"
+	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
 type options struct {
@@ -57,6 +59,11 @@ func main() {
 		logrus.Fatalf("load config, err:%s", err.Error())
 	}
 
+	if err := db.InitPostgresql(&cfg.PostgresqlConfig); err != nil {
+		logrus.Fatalf("init db, err:%s", err.Error())
+	}
+
+	dp.Init(&cfg.DPConfig)
 	// run
 	server.StartWebServer(o.service.Port, o.service.GracePeriod, cfg)
 }
