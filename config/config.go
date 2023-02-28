@@ -1,41 +1,30 @@
 package config
 
 import (
-	"errors"
-
 	"github.com/opensourceways/community-robot-lib/utils"
 
 	"github.com/opensourceways/software-package-server/infrastructure/db"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
-func LoadConfig(path string, cfg interface{}) (err error) {
-	if err = utils.LoadFromYaml(path, cfg); err != nil {
-		return
+func LoadConfig(path string) (*Config, error) {
+	cfg := new(Config)
+	if err := utils.LoadFromYaml(path, cfg); err != nil {
+		return nil, err
 	}
 
-	if f, ok := cfg.(configSetDefault); ok {
-		f.SetDefault()
+	cfg.SetDefault()
+	if err := cfg.Validate(); err != nil {
+		return nil, err
 	}
 
-	if f, ok := cfg.(configValidate); ok {
-		if err = f.Validate(); err != nil {
-			return
-		}
+	if err := db.InitPostgresql(&cfg.PostgresqlConfig); err != nil {
+		return nil, err
 	}
 
-	c, ok := cfg.(*Config)
-	if !ok {
-		return errors.New("assert config fail")
-	}
+	dp.Init(&cfg.DPConfig)
 
-	if err = db.InitPostgresql(&c.PostgresqlConfig); err != nil {
-		return
-	}
-
-	dp.Init(&c.DPConfig)
-
-	return nil
+	return cfg, nil
 }
 
 type configValidate interface {
