@@ -4,19 +4,19 @@
         "contact": {}
     },
     "paths": {
-        "/v1/add-software": {
+        "/v1/softwarepkg": {
             "post": {
-                "description": "add software",
+                "description": "apply a new software package",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "softwarePkg"
+                    "SoftwarePkg"
                 ],
-                "summary": "add software",
+                "summary": "apply a new software package",
                 "parameters": [
                     {
-                        "description": "body of creating software pkg",
+                        "description": "body of apply a new software package",
                         "name": "param",
                         "in": "body",
                         "required": true,

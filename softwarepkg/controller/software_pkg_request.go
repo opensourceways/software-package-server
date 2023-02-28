@@ -16,7 +16,7 @@ type softwareRequest struct {
 	PackageReason     string `json:"package_reason"      binding:"required"`
 }
 
-func (s softwareRequest) ToCmd() (pkg app.CmdToApplyNewSoftwarePkg, user dp.Account, err error) {
+func (s softwareRequest) toCmd() (pkg app.CmdToApplyNewSoftwarePkg, user dp.Account, err error) {
 	pkg.SourceCode.Address, err = dp.NewURL(s.SourceCodeUrl)
 	if err != nil {
 		return

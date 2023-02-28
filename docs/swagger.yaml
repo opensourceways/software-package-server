@@ -38,13 +38,13 @@ definitions:
 info:
   contact: {}
 paths:
-  /v1/add-software:
+  /v1/softwarepkg:
     post:
       consumes:
       - application/json
-      description: add software
+      description: apply a new software package
       parameters:
-      - description: body of creating software pkg
+      - description: body of apply a new software package
         in: body
         name: param
         required: true
@@ -59,7 +59,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.ResponseData'
-      summary: add software
+      summary: apply a new software package
       tags:
-      - softwarePkg
+      - SoftwarePkg
 swagger: "2.0"

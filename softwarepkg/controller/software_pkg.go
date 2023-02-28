@@ -8,30 +8,30 @@ import (
 	"github.com/opensourceways/software-package-server/softwarepkg/app"
 )
 
-type SoftwareController struct {
+type SoftwarePkgController struct {
 	controller.BaseController
 	repo app.SoftwarePkgService
 }
 
 func AddRouteForSoftwareController(r *gin.RouterGroup, repo app.SoftwarePkgService) {
-	ctl := SoftwareController{
+	ctl := SoftwarePkgController{
 		repo: repo,
 	}
 
-	r.POST("/v1/add-software", ctl.AddSoftware)
+	r.POST("/v1/softwarepkg", ctl.ApplyNewPkg)
 
 }
 
-// AddSoftware
-// @Summary add software
-// @Description add software
-// @Tags  softwarePkg
+// ApplyNewPkg
+// @Summary apply a new software package
+// @Description apply a new software package
+// @Tags  SoftwarePkg
 // @Accept json
-// @Param	param  body	 softwareRequest	true	"body of creating software pkg"
-// @Success 201 {object} controller.ResponseData
-// @Failure 400 {object} controller.ResponseData
-// @Router /v1/add-software [post]
-func (ctl SoftwareController) AddSoftware(ctx *gin.Context) {
+// @Param	param  body	 softwareRequest	true	"body of apply a new software package"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/softwarepkg [post]
+func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 	var req softwareRequest
 
 	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
@@ -40,15 +40,15 @@ func (ctl SoftwareController) AddSoftware(ctx *gin.Context) {
 		return
 	}
 
-	pkg, user, err := req.ToCmd()
+	pkg, user, err := req.toCmd()
 	if err != nil {
 		ctl.SendBadRequestParam(ctx, err)
 
 		return
 	}
 
-	if code, cErr := ctl.repo.ApplyNewPkg(user, &pkg); cErr != nil {
-		ctl.SendBadRequest(ctx, code, cErr)
+	if code, err := ctl.repo.ApplyNewPkg(user, &pkg); err != nil {
+		ctl.SendBadRequest(ctx, code, err)
 	} else {
 		ctl.SendCreateSuccess(ctx)
 	}

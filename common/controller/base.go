@@ -23,9 +23,7 @@ func (ctl BaseController) SendCreateSuccess(ctx *gin.Context) {
 
 func (ctl BaseController) SendBadRequest(ctx *gin.Context, code string, err error) {
 	if code == "" {
-		ctx.JSON(http.StatusBadRequest, newResponseCodeMsg(errorBadRequest, err.Error()))
-
-		return
+		code = errorBadRequest
 	}
 
 	ctx.JSON(http.StatusBadRequest, newResponseCodeMsg(code, err.Error()))
