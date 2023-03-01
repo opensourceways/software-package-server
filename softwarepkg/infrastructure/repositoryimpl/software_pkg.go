@@ -35,7 +35,6 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 	var (
 		filter SoftwarePkgDO
 		result []SoftwarePkgDO
-		info   domain.SoftwarePkgBasicInfo
 	)
 	if pkgs.Importer != nil {
 		filter.ImportUser = pkgs.Importer.Account()
@@ -52,11 +51,11 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 		return
 	}
 
-	for _, v := range result {
-		if info, err = v.toSoftwarePkgSummary(); err != nil {
+	r = make([]domain.SoftwarePkgBasicInfo, len(result))
+	for i, v := range result {
+		if r[i], err = v.toSoftwarePkgSummary(); err != nil {
 			return
 		}
-		r = append(r, info)
 	}
 
 	return
