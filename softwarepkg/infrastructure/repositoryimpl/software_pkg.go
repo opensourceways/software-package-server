@@ -3,19 +3,17 @@ package repositoryimpl
 import (
 	"errors"
 
-	"gorm.io/gorm"
-
 	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/repository"
 )
 
 type softwarePkgImpl struct {
-	db *gorm.DB
+	cli dbClient
 }
 
-func NewSoftwarePkg(db *gorm.DB) repository.SoftwarePkg {
-	return softwarePkgImpl{db: db}
+func NewSoftwarePkg(cli dbClient) repository.SoftwarePkg {
+	return softwarePkgImpl{cli: cli}
 }
 
 func (s softwarePkgImpl) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, version int) error {
@@ -44,18 +42,19 @@ func (s softwarePkgImpl) AddReviewComment(pid string, comment *domain.SoftwarePk
 }
 
 func (s softwarePkgImpl) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error {
-	softwareDO := s.toSoftwareDO(pkg)
+	softwarePkgDO := s.toSoftwarePkgDO(pkg)
 
-	return s.save(softwareDO)
+	return s.save(softwarePkgDO)
 }
 
 func (s softwarePkgImpl) save(soft *SoftwarePkgDO) error {
-	query := s.db.Where(&SoftwarePkgDO{PackageName: soft.PackageName}).FirstOrCreate(soft)
-	if err := query.Error; err != nil {
+	filter := &SoftwarePkgDO{PackageName: soft.PackageName}
+	rows, err := s.cli.NewRecordIfNotExists(filter, soft)
+	if err != nil {
 		return err
 	}
 
-	if query.RowsAffected == 0 {
+	if rows == 0 {
 		return commonrepo.NewErrorDuplicateCreating(errors.New("package exists"))
 	}
 

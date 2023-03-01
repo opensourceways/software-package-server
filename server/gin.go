@@ -43,18 +43,18 @@ func setRouter(engine *gin.Engine, cfg *config.Config) {
 	docs.SwaggerInfo.Description = "set header: 'PRIVATE-TOKEN=xxx'"
 
 	v1 := engine.Group(docs.SwaggerInfo.BasePath)
-	setApiV1(v1)
+	setApiV1(v1, cfg)
 
 	engine.UseRawPath = true
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
 
-func setApiV1(v1 *gin.RouterGroup) {
-	initSoftwarePkgService(v1)
+func setApiV1(v1 *gin.RouterGroup, cfg *config.Config) {
+	initSoftwarePkgService(v1, cfg)
 }
 
-func initSoftwarePkgService(v1 *gin.RouterGroup) {
-	softwarePkg := repositoryimpl.NewSoftwarePkg(postgresql.DB())
+func initSoftwarePkgService(v1 *gin.RouterGroup, cfg *config.Config) {
+	softwarePkg := repositoryimpl.NewSoftwarePkg(postgresql.NewDBCollection(cfg.Postgresql.Table.SoftwarePkg))
 	controller.AddRouteForSoftwarePkgController(
 		v1, softwarepkgapp.NewSoftwarePkgService(softwarePkg),
 	)

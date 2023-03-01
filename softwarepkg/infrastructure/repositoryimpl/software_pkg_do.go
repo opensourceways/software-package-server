@@ -30,7 +30,7 @@ func (SoftwarePkgDO) TableName() string {
 	return "software_pkg"
 }
 
-func (s softwarePkgImpl) toSoftwareDO(pkg *domain.SoftwarePkgBasicInfo) *SoftwarePkgDO {
+func (s softwarePkgImpl) toSoftwarePkgDO(pkg *domain.SoftwarePkgBasicInfo) *SoftwarePkgDO {
 	softwareDO := &SoftwarePkgDO{
 		UUID:            uuid.New(),
 		Phase:           pkg.Phase.PackagePhase(),
