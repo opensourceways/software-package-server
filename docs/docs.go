@@ -17,6 +17,52 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/v1/softwarepkg": {
+            "get": {
+                "description": "software package list",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ListPkgs"
+                ],
+                "summary": "software package list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "count_per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "importer",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_num",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "phase",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "apply a new software package",
                 "consumes": [

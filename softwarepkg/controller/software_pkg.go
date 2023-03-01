@@ -19,7 +19,7 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 	}
 
 	r.POST("/v1/softwarepkg", ctl.ApplyNewPkg)
-
+	r.GET("/v1/softwarepkg", ctl.ListPkgs)
 }
 
 // ApplyNewPkg
@@ -50,5 +50,36 @@ func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 		ctl.SendBadRequest(ctx, code, err)
 	} else {
 		ctl.SendCreateSuccess(ctx)
+	}
+}
+
+// ListPkgs
+// @Summary software package list
+// @Description software package list
+// @Tags  ListPkgs
+// @Accept json
+// @Param	param  query   softwarePkgListQuery	 true	"query of get software package list"
+// @Success 200 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/softwarepkg [get]
+func (ctl SoftwarePkgController) ListPkgs(ctx *gin.Context) {
+	var req softwarePkgListQuery
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctl.SendBadRequestBody(ctx, err)
+
+		return
+	}
+
+	pkg, err := req.toCmd()
+	if err != nil {
+		ctl.SendBadRequestParam(ctx, err)
+
+		return
+	}
+
+	if res, err := ctl.service.ListPkgs(&pkg); err != nil {
+		ctl.SendBadRequest(ctx, "", err)
+	} else {
+		ctl.SendRespOfGet(ctx, res)
 	}
 }

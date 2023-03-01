@@ -36,6 +36,35 @@ info:
   contact: {}
 paths:
   /v1/softwarepkg:
+    get:
+      consumes:
+      - application/json
+      description: software package list
+      parameters:
+      - in: query
+        name: count_per_page
+        type: integer
+      - in: query
+        name: importer
+        type: string
+      - in: query
+        name: page_num
+        type: integer
+      - in: query
+        name: phase
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: software package list
+      tags:
+      - ListPkgs
     post:
       consumes:
       - application/json
