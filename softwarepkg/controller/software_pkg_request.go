@@ -65,15 +65,13 @@ type softwarePkgListQuery struct {
 
 func (s softwarePkgListQuery) toCmd() (pkg app.CmdToListPkgs, err error) {
 	if s.Importer != "" {
-		pkg.Importer, err = dp.NewAccount(s.Importer)
-		if err != nil {
+		if pkg.Importer, err = dp.NewAccount(s.Importer); err != nil {
 			return
 		}
 	}
 
 	if s.Phase != "" {
-		pkg.Phase, err = dp.NewPackagePhase(s.Phase)
-		if err != nil {
+		if pkg.Phase, err = dp.NewPackagePhase(s.Phase); err != nil {
 			return
 		}
 	}
