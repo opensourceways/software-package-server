@@ -32,8 +32,34 @@ func (s softwarePkgImpl) FindSoftwarePkg(pid string) (domain.SoftwarePkg, int, e
 func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs) (
 	r []domain.SoftwarePkgBasicInfo, total int, err error,
 ) {
-	//TODO implement me
-	return nil, 0, err
+	var (
+		filter SoftwarePkgDO
+		result []SoftwarePkgDO
+		info   domain.SoftwarePkgBasicInfo
+	)
+	if pkgs.Importer != nil {
+		filter.ImportUser = pkgs.Importer.Account()
+	}
+
+	if pkgs.Phase != nil {
+		filter.Phase = pkgs.Phase.PackagePhase()
+	}
+
+	limit := pkgs.CountPerPage
+	offset := (pkgs.PageNum - 1) * limit
+
+	if total, err = s.cli.GetTableRecords(&filter, &result, limit, offset, applyTime, true); err != nil {
+		return
+	}
+
+	for _, v := range result {
+		if info, err = v.toSoftwarePkgSummary(); err != nil {
+			return
+		}
+		r = append(r, info)
+	}
+
+	return
 }
 
 func (s softwarePkgImpl) AddReviewComment(pid string, comment *domain.SoftwarePkgReviewComment) error {
