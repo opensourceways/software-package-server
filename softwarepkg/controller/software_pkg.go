@@ -54,12 +54,15 @@ func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 }
 
 // ListPkgs
-// @Summary software package list
-// @Description software package list
-// @Tags  ListPkgs
+// @Summary list software packages
+// @Description list software packages
+// @Tags  SoftwarePkg
 // @Accept json
-// @Param	param  query   softwarePkgListQuery	 true	"query of get software package list"
-// @Success 200 {object} ResponseData
+// @Param    importer         path	string  true    "importer of the softwarePkg"
+// @Param    phase            path	string  true    "phase of the softwarePkg"
+// @Param    count_per_page   path	int     true    "count per page"
+// @Param    page_num         path	int     true    "page num which starts from 1"
+// @Success 200 {object} app.SoftwarePkgsDTO
 // @Failure 400 {object} ResponseData
 // @Router /v1/softwarepkg [get]
 func (ctl SoftwarePkgController) ListPkgs(ctx *gin.Context) {

@@ -1,4 +1,28 @@
 definitions:
+  app.SoftwarePkgBasicInfoDTO:
+    properties:
+      applied_at:
+        type: string
+      id:
+        type: string
+      importer:
+        type: string
+      phase:
+        type: string
+      pkg_name:
+        type: string
+      repo_link:
+        type: string
+    type: object
+  app.SoftwarePkgsDTO:
+    properties:
+      pkgs:
+        items:
+          $ref: '#/definitions/app.SoftwarePkgBasicInfoDTO'
+        type: array
+      total:
+        type: integer
+    type: object
   controller.ResponseData:
     properties:
       code:
@@ -39,32 +63,36 @@ paths:
     get:
       consumes:
       - application/json
-      description: software package list
+      description: list software packages
       parameters:
-      - in: query
-        name: count_per_page
-        type: integer
-      - in: query
+      - description: importer of the softwarePkg
+        in: query
         name: importer
         type: string
-      - in: query
-        name: page_num
-        type: integer
-      - in: query
+      - description: phase of the softwarePkg
+        in: query
         name: phase
         type: string
+      - description: count per page
+        in: query
+        name: count_per_page
+        type: integer
+      - description: page num which starts from 1
+        in: query
+        name: page_num
+        type: integer
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.ResponseData'
+            $ref: '#/definitions/app.SoftwarePkgsDTO'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.ResponseData'
-      summary: software package list
+      summary: list software packages
       tags:
-      - ListPkgs
+      - SoftwarePkg
     post:
       consumes:
       - application/json

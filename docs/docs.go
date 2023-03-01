@@ -18,33 +18,37 @@ const docTemplate = `{
     "paths": {
         "/v1/softwarepkg": {
             "get": {
-                "description": "software package list",
+                "description": "list software packages",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "ListPkgs"
+                    "SoftwarePkg"
                 ],
-                "summary": "software package list",
+                "summary": "list software packages",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "name": "count_per_page",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
+                        "description": "importer of the softwarePkg",
                         "name": "importer",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "page_num",
+                        "type": "string",
+                        "description": "phase of the softwarePkg",
+                        "name": "phase",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "name": "phase",
+                        "type": "integer",
+                        "description": "count per page",
+                        "name": "count_per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page num which starts from 1",
+                        "name": "page_num",
                         "in": "query"
                     }
                 ],
@@ -52,7 +56,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseData"
+                            "$ref": "#/definitions/app.SoftwarePkgsDTO"
                         }
                     },
                     "400": {
@@ -101,6 +105,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "app.SoftwarePkgBasicInfoDTO": {
+            "type": "object",
+            "properties": {
+                "applied_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "importer": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "pkg_name": {
+                    "type": "string"
+                },
+                "repo_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "app.SoftwarePkgsDTO": {
+            "type": "object",
+            "properties": {
+                "pkgs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/app.SoftwarePkgBasicInfoDTO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "controller.ResponseData": {
             "type": "object",
             "properties": {
