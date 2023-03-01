@@ -78,16 +78,16 @@ func (s softwarePkgListQuery) toCmd() (pkg app.CmdToListPkgs, err error) {
 		}
 	}
 
-	if s.PageNum <= 0 {
-		pkg.PageNum = pageNum
-	} else {
+	if s.PageNum > 0 {
 		pkg.PageNum = s.PageNum
+	} else {
+		pkg.PageNum = pageNum
 	}
 
-	if s.CountPerPage <= 0 {
-		pkg.CountPerPage = countPerPage
-	} else {
+	if s.CountPerPage > 0 {
 		pkg.CountPerPage = s.CountPerPage
+	} else {
+		pkg.CountPerPage = countPerPage
 	}
 
 	return

@@ -68,7 +68,7 @@ func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 func (ctl SoftwarePkgController) ListPkgs(ctx *gin.Context) {
 	var req softwarePkgListQuery
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctl.SendBadRequestBody(ctx, err)
+		ctl.SendBadRequestParam(ctx, err)
 
 		return
 	}
@@ -80,9 +80,9 @@ func (ctl SoftwarePkgController) ListPkgs(ctx *gin.Context) {
 		return
 	}
 
-	if res, err := ctl.service.ListPkgs(&pkg); err != nil {
+	if v, err := ctl.service.ListPkgs(&pkg); err != nil {
 		ctl.SendBadRequest(ctx, "", err)
 	} else {
-		ctl.SendRespOfGet(ctx, res)
+		ctl.SendRespOfGet(ctx, v)
 	}
 }
