@@ -49,7 +49,7 @@ func (s softwarePkgImpl) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error 
 
 func (s softwarePkgImpl) save(soft *SoftwarePkgDO) error {
 	filter := &SoftwarePkgDO{PackageName: soft.PackageName}
-	rows, err := s.cli.NewRecordIfNotExists(filter, soft)
+	rows, err := s.cli.Insert(filter, soft)
 	if err != nil {
 		return err
 	}

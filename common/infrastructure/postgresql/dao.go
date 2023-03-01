@@ -1,14 +1,14 @@
 package postgresql
 
-type dbCollection struct {
+type dbTable struct {
 	name string
 }
 
-func NewDBCollection(name string) dbCollection {
-	return dbCollection{name: name}
+func NewDBTable(name string) dbTable {
+	return dbTable{name: name}
 }
 
-func (d dbCollection) NewRecordIfNotExists(filter, result interface{}) (rows int64, err error) {
+func (d dbTable) Insert(filter, result interface{}) (rows int64, err error) {
 	query := db.Table(d.name).Where(filter).FirstOrCreate(result)
 
 	err = query.Error
