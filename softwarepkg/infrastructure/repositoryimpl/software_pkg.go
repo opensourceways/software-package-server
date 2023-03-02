@@ -1,6 +1,10 @@
 package repositoryimpl
 
 import (
+	"sort"
+
+	"github.com/google/uuid"
+
 	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
@@ -25,9 +29,41 @@ func (s softwarePkgImpl) FindSoftwarePkgBasicInfo(pid string) (domain.SoftwarePk
 	return domain.SoftwarePkgBasicInfo{}, 0, nil
 }
 
-func (s softwarePkgImpl) FindSoftwarePkg(pid string) (domain.SoftwarePkg, int, error) {
-	//TODO implement me
-	return domain.SoftwarePkg{}, 0, nil
+func (s softwarePkgImpl) FindSoftwarePkg(pid string) (
+	pkg domain.SoftwarePkg, version int, err error,
+) {
+	var u uuid.UUID
+	if u, err = uuid.Parse(pid); err != nil {
+		return
+	}
+
+	var (
+		result SoftwarePkgPreload
+		filter = SoftwarePkgDO{UUID: u}
+	)
+	if err = s.cli.GetTableRecord(&filter, &result, "SoftwarePkgReviewDO"); err != nil {
+		return
+	}
+
+	version = result.SoftwarePkgDO.Version
+
+	if pkg.SoftwarePkgBasicInfo, err = result.SoftwarePkgDO.toSoftwarePkgSummary(); err != nil {
+		return
+	}
+
+	pkg.Comments = make([]domain.SoftwarePkgReviewComment, len(result.SoftwarePkgReviewDO))
+
+	for i, do := range result.SoftwarePkgReviewDO {
+		if pkg.Comments[i], err = do.toSoftwarePkgReviewCommentSummary(); err != nil {
+			return
+		}
+	}
+
+	sort.Slice(pkg.Comments, func(i, j int) bool {
+		return pkg.Comments[i].CreatedAt < pkg.Comments[j].CreatedAt
+	})
+
+	return
 }
 
 func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs) (

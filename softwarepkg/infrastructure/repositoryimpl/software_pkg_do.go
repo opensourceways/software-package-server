@@ -36,6 +36,11 @@ func (SoftwarePkgDO) TableName() string {
 	return "software_pkg"
 }
 
+type SoftwarePkgPreload struct {
+	SoftwarePkgDO
+	SoftwarePkgReviewDO []SoftwarePkgReviewDO `gorm:"foreignKey:software_uuid;references:uuid"`
+}
+
 func (s softwarePkgImpl) toSoftwarePkgDO(pkg *domain.SoftwarePkgBasicInfo) *SoftwarePkgDO {
 	softwareDO := &SoftwarePkgDO{
 		UUID:            uuid.New(),
