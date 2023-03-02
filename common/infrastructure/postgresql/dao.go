@@ -15,8 +15,17 @@ type SortByColumn struct {
 	Ascend bool
 }
 
+func (s SortByColumn) order() string {
+	v := " ASC"
+	if !s.Ascend {
+		v = " DESC"
+	}
+	return s.Column + v
+}
+
 type Pagination struct {
-	PageNum, CountPerPage int
+	PageNum      int
+	CountPerPage int
 }
 
 func (p Pagination) pagination() (limit, offset int) {
@@ -28,14 +37,6 @@ func (p Pagination) pagination() (limit, offset int) {
 	}
 
 	return
-}
-
-func (s SortByColumn) order() string {
-	v := " ASC"
-	if !s.Ascend {
-		v = " DESC"
-	}
-	return s.Column + v
 }
 
 type dbTable struct {
