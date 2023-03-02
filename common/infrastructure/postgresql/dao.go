@@ -92,14 +92,8 @@ func (t dbTable) Counts(filter interface{}) (int, error) {
 	return int(total), err
 }
 
-func (t dbTable) GetTableRecord(filter, result interface{}, preload ...string) error {
-	query := db.Table(t.name).Where(filter)
-
-	for _, v := range preload {
-		query.Preload(v)
-	}
-
-	return query.First(result).Error
+func (t dbTable) GetTableRecord(filter, result interface{}) error {
+	return db.Table(t.name).Where(filter).First(result).Error
 }
 
 func (t dbTable) IsRowNotExists(err error) bool {

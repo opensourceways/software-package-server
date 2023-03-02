@@ -1,37 +1,29 @@
 package repositoryimpl
 
 import (
-	"github.com/google/uuid"
-
-	"github.com/opensourceways/software-package-server/softwarepkg/domain"
-	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
+	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 )
 
-type SoftwarePkgReviewDO struct {
-	UUID         uuid.UUID `gorm:"column:uuid;type:uuid"`
-	Content      string    `gorm:"column:content"`
-	ApplyUser    string    `gorm:"column:apply_user"`
-	SoftwareUUID string    `gorm:"column:software_uuid;type:uuid"`
-	Status       int       `gorm:"column:status"`
-	Version      int       `gorm:"column:version"`
-	CreateTime   int64     `gorm:"column:create_time"`
-	UpdateTime   int64     `gorm:"column:update_time"`
+type softwarePkgReviewImpl struct {
+	cli dbClient
 }
 
-func (SoftwarePkgReviewDO) TableName() string {
-	return "software_pkg_review"
-}
-
-func (s SoftwarePkgReviewDO) toSoftwarePkgReviewCommentSummary() (pkgComment domain.SoftwarePkgReviewComment, err error) {
-	pkgComment.CreatedAt = s.CreateTime
-
-	pkgComment.Id = s.UUID.String()
-
-	if pkgComment.Author, err = dp.NewAccount(s.ApplyUser); err != nil {
-		return
+func NewSoftwarePkgReview(cli dbClient) softwarePkgReviewImpl {
+	return softwarePkgReviewImpl{
+		cli: cli,
 	}
+}
 
-	pkgComment.Content, err = dp.NewReviewComment(s.Content)
+func (s softwarePkgReviewImpl) FindSoftwarePkgReviews(pid string) (res []SoftwarePkgReviewDO, err error) {
+	var filterPkgReview = SoftwarePkgReviewDO{SoftwarePkgUUID: pid}
+	err = s.cli.GetTableRecords(
+		&filterPkgReview,
+		&res,
+		postgresql.Pagination{},
+		[]postgresql.SortByColumn{
+			{Column: createAt, Ascend: true},
+		},
+	)
 
 	return
 }

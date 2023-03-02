@@ -1,8 +1,6 @@
 package repositoryimpl
 
 import (
-	"sort"
-
 	"github.com/google/uuid"
 
 	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
@@ -12,11 +10,12 @@ import (
 )
 
 type softwarePkgImpl struct {
-	cli dbClient
+	cli       dbClient
+	pkgReview softwarePkgReviewImpl
 }
 
-func NewSoftwarePkg(cli dbClient) repository.SoftwarePkg {
-	return softwarePkgImpl{cli: cli}
+func NewSoftwarePkg(cli dbClient, pkgReview softwarePkgReviewImpl) repository.SoftwarePkg {
+	return softwarePkgImpl{cli: cli, pkgReview: pkgReview}
 }
 
 func (s softwarePkgImpl) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, version int) error {
@@ -38,30 +37,31 @@ func (s softwarePkgImpl) FindSoftwarePkg(pid string) (
 	}
 
 	var (
-		result SoftwarePkgPreload
-		filter = SoftwarePkgDO{UUID: u}
+		softwarePkg SoftwarePkgDO
+		filterPkg   = SoftwarePkgDO{UUID: u}
 	)
-	if err = s.cli.GetTableRecord(&filter, &result, "SoftwarePkgReviewDO"); err != nil {
+	if err = s.cli.GetTableRecord(&filterPkg, &softwarePkg); err != nil {
 		return
 	}
 
-	version = result.SoftwarePkgDO.Version
+	version = softwarePkg.Version
 
-	if pkg.SoftwarePkgBasicInfo, err = result.SoftwarePkgDO.toSoftwarePkgSummary(); err != nil {
+	var softwarePkgReview []SoftwarePkgReviewDO
+	if softwarePkgReview, err = s.pkgReview.FindSoftwarePkgReviews(pid); err != nil {
 		return
 	}
 
-	pkg.Comments = make([]domain.SoftwarePkgReviewComment, len(result.SoftwarePkgReviewDO))
+	if pkg.SoftwarePkgBasicInfo, err = softwarePkg.toSoftwarePkgSummary(); err != nil {
+		return
+	}
 
-	for i, do := range result.SoftwarePkgReviewDO {
+	pkg.Comments = make([]domain.SoftwarePkgReviewComment, len(softwarePkgReview))
+
+	for i, do := range softwarePkgReview {
 		if pkg.Comments[i], err = do.toSoftwarePkgReviewCommentSummary(); err != nil {
 			return
 		}
 	}
-
-	sort.Slice(pkg.Comments, func(i, j int) bool {
-		return pkg.Comments[i].CreatedAt < pkg.Comments[j].CreatedAt
-	})
 
 	return
 }
