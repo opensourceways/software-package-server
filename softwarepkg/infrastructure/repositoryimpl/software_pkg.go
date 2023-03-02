@@ -33,10 +33,7 @@ func (s softwarePkgImpl) FindSoftwarePkg(pid string) (domain.SoftwarePkg, int, e
 func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs) (
 	r []domain.SoftwarePkgBasicInfo, total int, err error,
 ) {
-	var (
-		filter SoftwarePkgDO
-		result []SoftwarePkgDO
-	)
+	var filter SoftwarePkgDO
 	if pkgs.Importer != nil {
 		filter.ImportUser = pkgs.Importer.Account()
 	}
@@ -53,7 +50,10 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 		{Column: applyTime, Ascend: false},
 	}
 
-	if err = s.cli.GetTableRecords(&filter, &result, pkgs.PageNum, pkgs.CountPerPage, sort); err != nil {
+	var p = postgresql.Pagination{PageNum: pkgs.PageNum, CountPerPage: pkgs.CountPerPage}
+
+	var result []SoftwarePkgDO
+	if err = s.cli.GetTableRecords(&filter, &result, p, sort); err != nil {
 		return
 	}
 

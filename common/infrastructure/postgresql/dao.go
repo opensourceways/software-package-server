@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"errors"
+	"strings"
 )
 
 var (
@@ -14,10 +15,25 @@ type SortByColumn struct {
 	Ascend bool
 }
 
+type Pagination struct {
+	PageNum, CountPerPage int
+}
+
+func (p Pagination) pagination() (limit, offset int) {
+	limit = p.CountPerPage
+	if limit > 0 {
+		if p.PageNum > 0 {
+			offset = (p.PageNum - 1) * limit
+		}
+	}
+
+	return
+}
+
 func (s SortByColumn) order() string {
-	v := " ASC,"
+	v := " ASC"
 	if !s.Ascend {
-		v = " DESC,"
+		v = " DESC"
 	}
 	return s.Column + v
 }
@@ -45,26 +61,22 @@ func (t dbTable) Insert(filter, result interface{}) error {
 }
 
 func (t dbTable) GetTableRecords(
-	filter, result interface{}, pageNum, countPerPage int,
+	filter, result interface{}, p Pagination,
 	sort []SortByColumn,
 ) (err error) {
 	query := db.Table(t.name).Where(filter)
 
-	var order string
+	var orders []string
 	for _, v := range sort {
-		order += v.order()
+		orders = append(orders, v.order())
 	}
 
-	if len(order) >= 0 {
-		query.Order(order[:len(order)-1])
+	if len(orders) >= 0 {
+		query.Order(strings.Join(orders, ","))
 	}
 
-	if countPerPage > 0 {
-		offset := 0
-		if pageNum > 0 {
-			offset = (pageNum - 1) * countPerPage
-		}
-		query.Limit(countPerPage).Offset(offset)
+	if limit, offset := p.pagination(); limit > 0 {
+		query.Limit(limit).Offset(offset)
 	}
 
 	err = query.Find(result).Error

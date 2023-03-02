@@ -56,12 +56,6 @@ func (s softwarePkgImpl) toSoftwarePkgDO(pkg *domain.SoftwarePkgBasicInfo) *Soft
 }
 
 func (s SoftwarePkgDO) toSoftwarePkgSummary() (info domain.SoftwarePkgBasicInfo, err error) {
-	var (
-		pkg     domain.SoftwarePkgApplication
-		approve dp.Account
-		reject  dp.Account
-	)
-
 	info.Id = s.UUID.String()
 
 	if info.PkgName, err = dp.NewPackageName(s.PackageName); err != nil {
@@ -84,6 +78,7 @@ func (s SoftwarePkgDO) toSoftwarePkgSummary() (info domain.SoftwarePkgBasicInfo,
 
 	info.AppliedAt = s.ApplyTime
 
+	var pkg domain.SoftwarePkgApplication
 	if pkg, err = s.toSoftwarePkgApplication(); err != nil {
 		return
 	} else {
@@ -91,6 +86,7 @@ func (s SoftwarePkgDO) toSoftwarePkgSummary() (info domain.SoftwarePkgBasicInfo,
 	}
 
 	for _, v := range s.ApproveUser {
+		var approve dp.Account
 		if approve, err = dp.NewAccount(v); err != nil {
 			return
 		}
@@ -98,6 +94,7 @@ func (s SoftwarePkgDO) toSoftwarePkgSummary() (info domain.SoftwarePkgBasicInfo,
 	}
 
 	for _, v := range s.RejectUser {
+		var reject dp.Account
 		if reject, err = dp.NewAccount(v); err != nil {
 			return
 		}
