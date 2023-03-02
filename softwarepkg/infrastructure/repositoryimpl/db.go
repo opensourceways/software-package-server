@@ -5,7 +5,7 @@ import "github.com/opensourceways/software-package-server/common/infrastructure/
 type dbClient interface {
 	Insert(filter, result interface{}) error
 	Counts(filter interface{}) (int, error)
-	GetTableRecords(filter, result interface{}, pageNum, countPerPage int, sort map[string]postgresql.Sort) (err error)
+	GetTableRecords(filter, result interface{}, pageNum, countPerPage int, sort []postgresql.SortByColumn) (err error)
 
 	IsRowNotExists(err error) bool
 	IsRowExists(err error) bool

@@ -2,17 +2,25 @@ package postgresql
 
 import (
 	"errors"
-	"fmt"
 )
 
 var (
 	errRowExists    = errors.New("row exists")
 	errRowNotExists = errors.New("row doesn't exist")
-	Descend         = Sort("DESC")
-	Ascend          = Sort("ASC")
 )
 
-type Sort string
+type SortByColumn struct {
+	Column string
+	Ascend bool
+}
+
+func (s SortByColumn) order() string {
+	v := " ASC,"
+	if !s.Ascend {
+		v = " DESC,"
+	}
+	return s.Column + v
+}
 
 type dbTable struct {
 	name string
@@ -38,27 +46,25 @@ func (t dbTable) Insert(filter, result interface{}) error {
 
 func (t dbTable) GetTableRecords(
 	filter, result interface{}, pageNum, countPerPage int,
-	sort map[string]Sort,
+	sort []SortByColumn,
 ) (err error) {
 	query := db.Table(t.name).Where(filter)
 
 	var order string
-	for k, v := range sort {
-		if v == Descend {
-			order += fmt.Sprintf("%s %s ,", k, Descend)
-		}
-
-		if v == Ascend {
-			order += fmt.Sprintf("%s %s ,", k, Ascend)
-		}
+	for _, v := range sort {
+		order += v.order()
 	}
 
 	if len(order) >= 0 {
 		query.Order(order[:len(order)-1])
 	}
 
-	if pageNum > 0 {
-		query.Limit(countPerPage).Offset((pageNum - 1) * countPerPage)
+	if countPerPage > 0 {
+		offset := 0
+		if pageNum > 0 {
+			offset = (pageNum - 1) * countPerPage
+		}
+		query.Limit(countPerPage).Offset(offset)
 	}
 
 	err = query.Find(result).Error

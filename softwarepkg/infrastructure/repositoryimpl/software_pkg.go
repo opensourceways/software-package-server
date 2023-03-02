@@ -49,8 +49,8 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 		return
 	}
 
-	var sort = map[string]postgresql.Sort{
-		applyTime: postgresql.Descend,
+	var sort = []postgresql.SortByColumn{
+		{Column: applyTime, Ascend: false},
 	}
 
 	if err = s.cli.GetTableRecords(&filter, &result, pkgs.PageNum, pkgs.CountPerPage, sort); err != nil {
