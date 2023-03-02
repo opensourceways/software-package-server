@@ -19,12 +19,12 @@ type SoftwarePkgReviewDO struct {
 	SoftwarePkgUUID string    `gorm:"column:software_pkg_uuid;type:uuid"`
 	Status          int       `gorm:"column:status"`
 	Version         int       `gorm:"column:version"`
-	CreateAt        int64     `gorm:"column:create_time"`
-	UpdateAt        int64     `gorm:"column:update_time"`
+	CreatedAt       int64     `gorm:"column:create_time"`
+	UpdatedAt       int64     `gorm:"column:update_time"`
 }
 
 func (s SoftwarePkgReviewDO) toSoftwarePkgReviewCommentSummary() (pkgComment domain.SoftwarePkgReviewComment, err error) {
-	pkgComment.CreatedAt = s.CreateAt
+	pkgComment.CreatedAt = s.CreatedAt
 
 	pkgComment.Id = s.UUID.String()
 

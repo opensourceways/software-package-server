@@ -23,14 +23,7 @@ func (s softwarePkgImpl) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, versi
 	return nil
 }
 
-func (s softwarePkgImpl) FindSoftwarePkgBasicInfo(pid string) (domain.SoftwarePkgBasicInfo, int, error) {
-	//TODO implement me
-	return domain.SoftwarePkgBasicInfo{}, 0, nil
-}
-
-func (s softwarePkgImpl) FindSoftwarePkg(pid string) (
-	pkg domain.SoftwarePkg, version int, err error,
-) {
+func (s softwarePkgImpl) FindSoftwarePkgBasicInfo(pid string) (info domain.SoftwarePkgBasicInfo, version int, err error) {
 	var u uuid.UUID
 	if u, err = uuid.Parse(pid); err != nil {
 		return
@@ -41,27 +34,15 @@ func (s softwarePkgImpl) FindSoftwarePkg(pid string) (
 		filterPkg   = SoftwarePkgDO{UUID: u}
 	)
 	if err = s.cli.GetTableRecord(&filterPkg, &softwarePkg); err != nil {
+		if s.cli.IsRowNotExists(err) {
+			err = commonrepo.NewErrorResourceNotExists(err)
+		}
 		return
 	}
 
 	version = softwarePkg.Version
 
-	var softwarePkgReview []SoftwarePkgReviewDO
-	if softwarePkgReview, err = s.pkgReview.FindSoftwarePkgReviews(pid); err != nil {
-		return
-	}
-
-	if pkg.SoftwarePkgBasicInfo, err = softwarePkg.toSoftwarePkgSummary(); err != nil {
-		return
-	}
-
-	pkg.Comments = make([]domain.SoftwarePkgReviewComment, len(softwarePkgReview))
-
-	for i, do := range softwarePkgReview {
-		if pkg.Comments[i], err = do.toSoftwarePkgReviewCommentSummary(); err != nil {
-			return
-		}
-	}
+	info, err = softwarePkg.toSoftwarePkgSummary()
 
 	return
 }
@@ -106,6 +87,24 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 func (s softwarePkgImpl) AddReviewComment(pid string, comment *domain.SoftwarePkgReviewComment) error {
 	//TODO implement me
 	return nil
+}
+
+func (s softwarePkgImpl) FindSoftwarePkgReviewComments(pid string) (
+	comments []domain.SoftwarePkgReviewComment, err error,
+) {
+	var softwarePkgReview []SoftwarePkgReviewDO
+	if softwarePkgReview, err = s.pkgReview.FindSoftwarePkgReviews(pid); err != nil {
+		return
+	}
+
+	comments = make([]domain.SoftwarePkgReviewComment, len(softwarePkgReview))
+	for i, do := range softwarePkgReview {
+		if comments[i], err = do.toSoftwarePkgReviewCommentSummary(); err != nil {
+			return
+		}
+	}
+
+	return
 }
 
 func (s softwarePkgImpl) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error {

@@ -3,6 +3,8 @@ package postgresql
 import (
 	"errors"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -93,7 +95,12 @@ func (t dbTable) Counts(filter interface{}) (int, error) {
 }
 
 func (t dbTable) GetTableRecord(filter, result interface{}) error {
-	return db.Table(t.name).Where(filter).First(result).Error
+	err := db.Table(t.name).Where(filter).First(result).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errRowNotExists
+	}
+
+	return err
 }
 
 func (t dbTable) IsRowNotExists(err error) bool {
