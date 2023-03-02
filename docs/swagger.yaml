@@ -38,7 +38,7 @@ definitions:
       content:
         type: string
       created_at:
-        type: integer
+        type: string
       id:
         type: string
     type: object
@@ -116,29 +116,6 @@ definitions:
 info:
   contact: {}
 paths:
-  /v1/:pid/softwarepkg:
-    get:
-      consumes:
-      - application/json
-      description: get software package
-      parameters:
-      - description: pid of software package id
-        in: path
-        name: pid
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.SoftwarePkgReviewDTO'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controller.ResponseData'
-      summary: get software package
-      tags:
-      - SoftwarePkg
   /v1/softwarepkg:
     get:
       consumes:
@@ -194,6 +171,29 @@ paths:
           schema:
             $ref: '#/definitions/controller.ResponseData'
       summary: apply a new software package
+      tags:
+      - SoftwarePkg
+  /v1/softwarepkg/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get software package
+      parameters:
+      - description: id of software package
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.SoftwarePkgReviewDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: get software package
       tags:
       - SoftwarePkg
 swagger: "2.0"

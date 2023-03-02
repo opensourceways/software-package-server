@@ -81,7 +81,7 @@ type SoftwarePkgReviewCommentDTO struct {
 	Id        string `json:"id"`
 	Author    string `json:"author"`
 	Content   string `json:"content"`
-	CreatedAt int64  `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 func toSoftwarePkgReviewCommentDTO(v *domain.SoftwarePkgReviewComment) SoftwarePkgReviewCommentDTO {
@@ -89,7 +89,7 @@ func toSoftwarePkgReviewCommentDTO(v *domain.SoftwarePkgReviewComment) SoftwareP
 		Id:        v.Id,
 		Author:    v.Author.Account(),
 		Content:   v.Content.ReviewComment(),
-		CreatedAt: v.CreatedAt,
+		CreatedAt: utils.ToDate(v.CreatedAt),
 	}
 }
 

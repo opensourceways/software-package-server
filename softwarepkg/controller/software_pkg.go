@@ -20,7 +20,7 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 
 	r.POST("/v1/softwarepkg", ctl.ApplyNewPkg)
 	r.GET("/v1/softwarepkg", ctl.ListPkgs)
-	r.GET("/v1/:pid/softwarepkg", ctl.Get)
+	r.GET("/v1/softwarepkg/:id", ctl.Get)
 }
 
 // ApplyNewPkg
@@ -93,12 +93,12 @@ func (ctl SoftwarePkgController) ListPkgs(ctx *gin.Context) {
 // @Description get software package
 // @Tags  SoftwarePkg
 // @Accept json
-// @Param    pid         path	string  true    "pid of software package id"
+// @Param    id         path	string  true    "id of software package"
 // @Success 200 {object} app.SoftwarePkgReviewDTO
 // @Failure 400 {object} ResponseData
-// @Router /v1/:pid/softwarepkg [get]
+// @Router /v1/softwarepkg/{id} [get]
 func (ctl SoftwarePkgController) Get(ctx *gin.Context) {
-	if v, err := ctl.service.GetPkgReviewDetail(ctx.Param("pid")); err != nil {
+	if v, err := ctl.service.GetPkgReviewDetail(ctx.Param("id")); err != nil {
 		ctl.SendBadRequest(ctx, "", err)
 	} else {
 		ctl.SendRespOfGet(ctx, v)

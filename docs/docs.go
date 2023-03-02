@@ -16,41 +16,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/:pid/softwarepkg": {
-            "get": {
-                "description": "get software package",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SoftwarePkg"
-                ],
-                "summary": "get software package",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "pid of software package id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.SoftwarePkgReviewDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/softwarepkg": {
             "get": {
                 "description": "list software packages",
@@ -137,6 +102,41 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/softwarepkg/{id}": {
+            "get": {
+                "description": "get software package",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SoftwarePkg"
+                ],
+                "summary": "get software package",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of software package",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.SoftwarePkgReviewDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -199,7 +199,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
