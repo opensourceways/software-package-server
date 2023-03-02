@@ -1,11 +1,18 @@
 package postgresql
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	errRowExists    = errors.New("row exists")
 	errRowNotExists = errors.New("row doesn't exist")
+	Descend         = Sort("DESC")
+	Ascend          = Sort("ASC")
 )
+
+type Sort string
 
 type dbTable struct {
 	name string
@@ -30,28 +37,38 @@ func (t dbTable) Insert(filter, result interface{}) error {
 }
 
 func (t dbTable) GetTableRecords(
-	filter, result interface{}, limit, offset int,
-	column string, desc bool,
-) (_ int, err error) {
-	var total int64
+	filter, result interface{}, pageNum, countPerPage int,
+	sort map[string]Sort,
+) (err error) {
 	query := db.Table(t.name).Where(filter)
-	if err = query.Count(&total).Error; err != nil || total == 0 {
-		return 0, err
-	}
 
-	if len(column) != 0 {
-		if desc {
-			query.Order(column + " desc")
-		} else {
-			query.Order(column + " asc")
+	var order string
+	for k, v := range sort {
+		if v == Descend {
+			order += fmt.Sprintf("%s %s ,", k, Descend)
+		}
+
+		if v == Ascend {
+			order += fmt.Sprintf("%s %s ,", k, Ascend)
 		}
 	}
 
-	if limit > 0 && offset >= 0 {
-		query.Limit(limit).Offset(offset)
+	if len(order) >= 0 {
+		query.Order(order[:len(order)-1])
+	}
+
+	if pageNum > 0 {
+		query.Limit(countPerPage).Offset((pageNum - 1) * countPerPage)
 	}
 
 	err = query.Find(result).Error
+
+	return
+}
+
+func (t dbTable) Counts(filter interface{}) (int, error) {
+	var total int64
+	err := db.Table(t.name).Where(filter).Count(&total).Error
 
 	return int(total), err
 }

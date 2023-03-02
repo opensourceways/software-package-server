@@ -2,6 +2,7 @@ package repositoryimpl
 
 import (
 	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
+	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/repository"
 )
@@ -44,10 +45,15 @@ func (s softwarePkgImpl) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs)
 		filter.Phase = pkgs.Phase.PackagePhase()
 	}
 
-	limit := pkgs.CountPerPage
-	offset := (pkgs.PageNum - 1) * limit
+	if total, err = s.cli.Counts(&filter); err != nil || total == 0 {
+		return
+	}
 
-	if total, err = s.cli.GetTableRecords(&filter, &result, limit, offset, applyTime, true); err != nil {
+	var sort = map[string]postgresql.Sort{
+		applyTime: postgresql.Descend,
+	}
+
+	if err = s.cli.GetTableRecords(&filter, &result, pkgs.PageNum, pkgs.CountPerPage, sort); err != nil {
 		return
 	}
 
