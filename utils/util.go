@@ -36,7 +36,7 @@ func ToDate(n int64) string {
 	return time.Unix(n, 0).Format("2006-01-02")
 }
 
-func ToDataTime(n int64) string {
+func ToDateTime(n int64) string {
 	if n == 0 {
 		n = Now()
 	}

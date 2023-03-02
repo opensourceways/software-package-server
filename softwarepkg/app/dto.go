@@ -89,7 +89,7 @@ func toSoftwarePkgReviewCommentDTO(v *domain.SoftwarePkgReviewComment) SoftwareP
 		Id:        v.Id,
 		Author:    v.Author.Account(),
 		Content:   v.Content.ReviewComment(),
-		CreatedAt: utils.ToDataTime(v.CreatedAt),
+		CreatedAt: utils.ToDateTime(v.CreatedAt),
 	}
 }
 
