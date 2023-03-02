@@ -1,4 +1,21 @@
 definitions:
+  app.SoftwarePkgApplicationDTO:
+    properties:
+      desc:
+        type: string
+      license:
+        type: string
+      name:
+        type: string
+      platform:
+        type: string
+      reason:
+        type: string
+      sig:
+        type: string
+      source_code:
+        type: string
+    type: object
   app.SoftwarePkgBasicInfoDTO:
     properties:
       applied_at:
@@ -11,6 +28,46 @@ definitions:
         type: string
       pkg_name:
         type: string
+      repo_link:
+        type: string
+    type: object
+  app.SoftwarePkgReviewCommentDTO:
+    properties:
+      author:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: integer
+      id:
+        type: string
+    type: object
+  app.SoftwarePkgReviewDTO:
+    properties:
+      application:
+        $ref: '#/definitions/app.SoftwarePkgApplicationDTO'
+      applied_at:
+        type: string
+      approved_by:
+        items:
+          type: string
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/app.SoftwarePkgReviewCommentDTO'
+        type: array
+      id:
+        type: string
+      importer:
+        type: string
+      phase:
+        type: string
+      pkg_name:
+        type: string
+      rejected_by:
+        items:
+          type: string
+        type: array
       repo_link:
         type: string
     type: object
@@ -59,6 +116,29 @@ definitions:
 info:
   contact: {}
 paths:
+  /v1/:pid/softwarepkg:
+    get:
+      consumes:
+      - application/json
+      description: get software package
+      parameters:
+      - description: pid of software package id
+        in: path
+        name: pid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.SoftwarePkgReviewDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: get software package
+      tags:
+      - SoftwarePkg
   /v1/softwarepkg:
     get:
       consumes:
