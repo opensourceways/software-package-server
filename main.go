@@ -77,7 +77,7 @@ func main() {
 	// Domain
 	dp.Init(&cfg.SoftwarePkg)
 
-	middleware.Init(cfg.Api.CheckUserUrl)
+	middleware.Init(cfg.Api.UserinfoUrl)
 
 	// run
 	server.StartWebServer(o.service.Port, o.service.GracePeriod, cfg)
