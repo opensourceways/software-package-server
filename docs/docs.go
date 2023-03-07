@@ -16,6 +16,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/reviewcomment/{id}": {
+            "post": {
+                "description": "create a new software package review comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SoftwarePkg"
+                ],
+                "summary": "create a new software package review comment",
+                "parameters": [
+                    {
+                        "description": "body of creating a new software package review comment",
+                        "name": "param",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.reviewCommentRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of software package",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/softwarepkg": {
             "get": {
                 "description": "list software packages",
@@ -269,6 +313,17 @@ const docTemplate = `{
                 },
                 "data": {},
                 "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.reviewCommentRequest": {
+            "type": "object",
+            "required": [
+                "comment"
+            ],
+            "properties": {
+                "comment": {
                     "type": "string"
                 }
             }

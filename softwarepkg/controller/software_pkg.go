@@ -22,6 +22,8 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 	r.POST("/v1/softwarepkg", ctl.ApplyNewPkg)
 	r.GET("/v1/softwarepkg", ctl.ListPkgs)
 	r.GET("/v1/softwarepkg/:id", ctl.Get)
+
+	r.POST("/v1/reviewcomment/:id", ctl.NewReviewComment)
 }
 
 // ApplyNewPkg
@@ -104,5 +106,38 @@ func (ctl SoftwarePkgController) Get(ctx *gin.Context) {
 		ctl.SendBadRequest(ctx, "", err)
 	} else {
 		ctl.SendRespOfGet(ctx, v)
+	}
+}
+
+// NewReviewComment
+// @Summary create a new software package review comment
+// @Description create a new software package review comment
+// @Tags  SoftwarePkg
+// @Accept json
+// @Param	param  body	 reviewCommentRequest	 true	"body of creating a new software package review comment"
+// @Param	id     path	 string	                 true	"id of software package"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/reviewcomment/{id} [post]
+func (ctl SoftwarePkgController) NewReviewComment(ctx *gin.Context) {
+	var req reviewCommentRequest
+	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		ctl.SendBadRequestBody(ctx, err)
+
+		return
+	}
+
+	// TODO fetch importer
+	cmd, err := req.toCmd(&domain.User{})
+	if err != nil {
+		ctl.SendBadRequestParam(ctx, err)
+
+		return
+	}
+
+	if code, err := ctl.service.NewReviewComment(ctx.Param("id"), &cmd); err != nil {
+		ctl.SendBadRequest(ctx, code, err)
+	} else {
+		ctl.SendCreateSuccess(ctx)
 	}
 }
