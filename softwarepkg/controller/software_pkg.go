@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	commonctl "github.com/opensourceways/software-package-server/common/controller"
+	"github.com/opensourceways/software-package-server/common/middleware"
 	"github.com/opensourceways/software-package-server/softwarepkg/app"
-	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 )
 
 type SoftwarePkgController struct {
@@ -19,7 +19,7 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 		service: pkgService,
 	}
 
-	r.POST("/v1/softwarepkg", ctl.ApplyNewPkg)
+	r.POST("/v1/softwarepkg", middleware.CheckUser(), ctl.ApplyNewPkg)
 	r.GET("/v1/softwarepkg", ctl.ListPkgs)
 	r.GET("/v1/softwarepkg/:id", ctl.Get)
 }
@@ -41,8 +41,14 @@ func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 		return
 	}
 
-	// TODO fetch importer
-	cmd, err := req.toCmd(&domain.User{})
+	user, err := toDomainUser(ctx)
+	if err != nil {
+		ctl.SendBadRequestParam(ctx, err)
+
+		return
+	}
+
+	cmd, err := req.toCmd(&user)
 	if err != nil {
 		ctl.SendBadRequestParam(ctx, err)
 

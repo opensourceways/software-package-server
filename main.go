@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
+	"github.com/opensourceways/software-package-server/common/middleware"
 	"github.com/opensourceways/software-package-server/config"
 	"github.com/opensourceways/software-package-server/server"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
@@ -75,6 +76,8 @@ func main() {
 
 	// Domain
 	dp.Init(&cfg.SoftwarePkg)
+
+	middleware.Init(cfg.Api.CheckUserUrl)
 
 	// run
 	server.StartWebServer(o.service.Port, o.service.GracePeriod, cfg)

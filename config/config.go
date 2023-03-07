@@ -37,10 +37,15 @@ type PostgresqlConfig struct {
 	repositoryimpl.Config
 }
 
+type api struct {
+	UserinfoUrl string `json:"userinfo_url" required:"true"`
+}
+
 type Config struct {
 	MQ          messageimpl.Config `json:"mq"             required:"true"`
 	Postgresql  PostgresqlConfig   `json:"postgresql"     required:"true"`
 	SoftwarePkg dp.Config          `json:"software_pkg"   required:"true"`
+	Api         api                `json:"api"            required:"true"`
 }
 
 func (cfg *Config) configItems() []interface{} {
@@ -49,6 +54,7 @@ func (cfg *Config) configItems() []interface{} {
 		&cfg.Postgresql.DB,
 		&cfg.Postgresql.Config,
 		&cfg.SoftwarePkg,
+		&cfg.Api,
 	}
 }
 
