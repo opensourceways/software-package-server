@@ -9,62 +9,55 @@ import (
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
-	"github.com/opensourceways/software-package-server/softwarepkg/domain/maintainer"
 )
 
-func NewMaintainerImpl(cfg *Config) maintainer.Maintainer {
-	return maintainerImpl{
-		permissionURL: cfg.PermissionURL,
-		community:     cfg.Community,
-		cli:           utils.NewHttpClient(3),
-	}
-}
-
-type maintainerImpl struct {
-	permissionURL string
-	community     string
-	cli           utils.HttpClient
-}
-
-type SigPermission struct {
+type sigPermission struct {
 	Data []struct {
 		Sig  string   `json:"sig"`
 		Type []string `json:"type"`
 	} `json:"data"`
 }
 
-func (s SigPermission) checkPermission(sig string) (flag bool) {
+func (s sigPermission) hasPermission(sig string) bool {
 	for _, v := range s.Data {
 		if v.Sig == sig && strings.Contains(strings.Join(v.Type, ","), "maintainers") {
-			flag = true
-			break
+			return true
 		}
 	}
 
-	return
+	return false
 }
 
-func (m maintainerImpl) baseUrl(user string) string {
-	return fmt.Sprintf(m.permissionURL, m.community, user)
+func NewMaintainerImpl(cfg *Config) maintainerImpl {
+	return maintainerImpl{
+		cfg: *cfg,
+		cli: utils.NewHttpClient(3),
+	}
 }
 
-func (m maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp.Account) (
-	flag bool, err error,
+type maintainerImpl struct {
+	cfg Config
+	cli utils.HttpClient
+}
+
+func (impl maintainerImpl) baseUrl(user string) string {
+	return fmt.Sprintf(impl.cfg.PermissionURL, user)
+}
+
+func (impl maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp.Account) (
+	bool, error,
 ) {
-	req, err := http.NewRequest("GET", m.baseUrl(user.Account()), nil)
+	req, err := http.NewRequest(http.MethodGet, impl.baseUrl(user.Account()), nil)
 	if err != nil {
-		return
+		return false, err
 	}
 
-	var res SigPermission
-	_, err = m.cli.ForwardTo(req, &res)
-	if err != nil {
-		return
+	var res sigPermission
+	if _, err = impl.cli.ForwardTo(req, &res); err != nil {
+		return false, err
 	}
 
 	sig := info.Application.ImportingPkgSig.ImportingPkgSig()
-
-	flag = res.checkPermission(sig)
-
-	return
+	
+	return res.hasPermission(sig), nil
 }
