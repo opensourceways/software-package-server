@@ -1,7 +1,6 @@
 package maintainerimpl
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -9,6 +8,10 @@ import (
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
+)
+
+const (
+	maintainers = "maintainers"
 )
 
 type sigPermission struct {
@@ -20,8 +23,12 @@ type sigPermission struct {
 
 func (s sigPermission) hasPermission(sig string) bool {
 	for _, v := range s.Data {
-		if v.Sig == sig && strings.Contains(strings.Join(v.Type, ","), "maintainers") {
-			return true
+		if strings.EqualFold(sig, v.Sig) {
+			for _, t := range v.Type {
+				if t == maintainers {
+					return true
+				}
+			}
 		}
 	}
 
@@ -29,6 +36,7 @@ func (s sigPermission) hasPermission(sig string) bool {
 }
 
 func NewMaintainerImpl(cfg *Config) maintainerImpl {
+	cfg.PermissionURL = cfg.PermissionURL + "&user="
 	return maintainerImpl{
 		cfg: *cfg,
 		cli: utils.NewHttpClient(3),
@@ -41,7 +49,7 @@ type maintainerImpl struct {
 }
 
 func (impl maintainerImpl) baseUrl(user string) string {
-	return fmt.Sprintf(impl.cfg.PermissionURL, user)
+	return impl.cfg.PermissionURL + user
 }
 
 func (impl maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp.Account) (
@@ -57,7 +65,5 @@ func (impl maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user
 		return false, err
 	}
 
-	sig := info.Application.ImportingPkgSig.ImportingPkgSig()
-	
-	return res.hasPermission(sig), nil
+	return res.hasPermission(info.Application.ImportingPkgSig.ImportingPkgSig()), nil
 }
