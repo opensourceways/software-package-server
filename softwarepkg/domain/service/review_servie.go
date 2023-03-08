@@ -20,6 +20,10 @@ type reviewService struct {
 	message message.SoftwarePkgMessage
 }
 
+func NewReviewService(m message.SoftwarePkgMessage) SoftwarePkgReviewService {
+	return &reviewService{message: m}
+}
+
 func (s *reviewService) ApprovePkg(pkg *domain.SoftwarePkgBasicInfo, user dp.Account) error {
 	approved, err := pkg.ApproveBy(user)
 	if !approved {

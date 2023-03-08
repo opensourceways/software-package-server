@@ -21,6 +21,10 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 	r.POST("/v1/softwarepkg", middleware.UserChecking().CheckUser, ctl.ApplyNewPkg)
 	r.GET("/v1/softwarepkg", ctl.ListPkgs)
 	r.GET("/v1/softwarepkg/:id", ctl.Get)
+
+	r.GET("/v1/reviewcomment/approve/:id", middleware.UserChecking().CheckUser, ctl.Approve)
+	r.GET("/v1/reviewcomment/reject/:id", middleware.UserChecking().CheckUser, ctl.Reject)
+	r.GET("/v1/reviewcomment/abandon/:id", middleware.UserChecking().CheckUser, ctl.Abandon)
 }
 
 // ApplyNewPkg
@@ -109,5 +113,77 @@ func (ctl SoftwarePkgController) Get(ctx *gin.Context) {
 		commonctl.SendFailedResp(ctx, "", err)
 	} else {
 		commonctl.SendRespOfGet(ctx, v)
+	}
+}
+
+// Approve
+// @Summary approve software package
+// @Description approve software package
+// @Tags  SoftwarePkg
+// @Accept json
+// @Param	id  path	 string	 true	"id of software package"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/reviewcomment/approve/{id} [get]
+func (ctl SoftwarePkgController) Approve(ctx *gin.Context) {
+	user, err := middleware.UserChecking().FetchUser(ctx)
+	if err != nil {
+		commonctl.SendBadRequest(ctx, "", err)
+
+		return
+	}
+
+	if code, err := ctl.service.Approve(ctx.Param("id"), user.Account); err != nil {
+		commonctl.SendBadRequest(ctx, code, err)
+	} else {
+		commonctl.SendCreateSuccess(ctx)
+	}
+}
+
+// Reject
+// @Summary reject software package
+// @Description reject software package
+// @Tags  SoftwarePkg
+// @Accept json
+// @Param	id  path	 string	 true	"id of software package"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/reviewcomment/reject/{id} [get]
+func (ctl SoftwarePkgController) Reject(ctx *gin.Context) {
+	user, err := middleware.UserChecking().FetchUser(ctx)
+	if err != nil {
+		commonctl.SendBadRequest(ctx, "", err)
+
+		return
+	}
+
+	if code, err := ctl.service.Reject(ctx.Param("id"), user.Account); err != nil {
+		commonctl.SendBadRequest(ctx, code, err)
+	} else {
+		commonctl.SendCreateSuccess(ctx)
+	}
+}
+
+// Abandon
+// @Summary abandon software package
+// @Description abandon software package
+// @Tags  SoftwarePkg
+// @Accept json
+// @Param	id  path	 string	 true	"id of software package"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Router /v1/reviewcomment/abandon/{id} [get]
+func (ctl SoftwarePkgController) Abandon(ctx *gin.Context) {
+	user, err := middleware.UserChecking().FetchUser(ctx)
+	if err != nil {
+		commonctl.SendBadRequest(ctx, "", err)
+
+		return
+	}
+
+	if code, err := ctl.service.Abandon(ctx.Param("id"), user.Account); err != nil {
+		commonctl.SendBadRequest(ctx, code, err)
+	} else {
+		commonctl.SendCreateSuccess(ctx)
 	}
 }

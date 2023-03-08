@@ -114,6 +114,75 @@ definitions:
 info:
   contact: {}
 paths:
+  /v1/reviewcomment/abandon/{id}:
+    get:
+      consumes:
+      - application/json
+      description: abandon software package
+      parameters:
+      - description: id of software package
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: abandon software package
+      tags:
+      - SoftwarePkg
+  /v1/reviewcomment/approve/{id}:
+    get:
+      consumes:
+      - application/json
+      description: approve software package
+      parameters:
+      - description: id of software package
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: approve software package
+      tags:
+      - SoftwarePkg
+  /v1/reviewcomment/reject/{id}:
+    get:
+      consumes:
+      - application/json
+      description: reject software package
+      parameters:
+      - description: id of software package
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: reject software package
+      tags:
+      - SoftwarePkg
   /v1/softwarepkg:
     get:
       consumes:
