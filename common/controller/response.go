@@ -1,11 +1,9 @@
 package controller
 
 const (
-	errorBadRequest       = "bad_request"
-	errorBadRequestBody   = "bad_request_body"
-	errorBadRequestParam  = "bad_request_param"
-	errorBadRequestHeader = "bad_request_header"
-	errorBadRequestCookie = "bad_request_cookie"
+	errorBadRequest      = "bad_request"
+	errorBadRequestBody  = "bad_request_body"
+	errorBadRequestParam = "bad_request_param"
 )
 
 type ResponseData struct {

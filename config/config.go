@@ -42,7 +42,7 @@ type Config struct {
 	MQ          messageimpl.Config `json:"mq"             required:"true"`
 	Postgresql  PostgresqlConfig   `json:"postgresql"     required:"true"`
 	SoftwarePkg dp.Config          `json:"software_pkg"   required:"true"`
-	Api         middleware.Api     `json:"api"            required:"true"`
+	Api         middleware.Config  `json:"api"            required:"true"`
 }
 
 func (cfg *Config) configItems() []interface{} {

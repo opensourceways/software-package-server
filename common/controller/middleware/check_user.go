@@ -13,29 +13,35 @@ import (
 )
 
 var (
-	userinfoUrl string
+	userInfoURL string
 	client      utils.HttpClient
 )
 
-type Api struct {
+type Config struct {
 	UserInfoURL string `json:"user_info_url" required:"true"`
 }
 
 const (
-	headerPrivateToken = "PRIVATE-TOKEN"
-	yG                 = "_Y_G_"
-	user               = "userinfo"
+	headerPrivateToken    = "PRIVATE-TOKEN"
+	cookieKey             = "_Y_G_"
+	userKey               = "userinfo"
+	errorBadRequestHeader = "bad_request_header"
+	errorBadRequestCookie = "bad_request_cookie"
 )
 
-func Init(url string) {
+func Init(cfg *Config) {
 	client = utils.NewHttpClient(3)
-	userinfoUrl = url
+	userInfoURL = cfg.UserInfoURL
+}
+
+func cookieValue(cookie string) string {
+	return cookieKey + "=" + cookie
 }
 
 func CheckUser(ctx *gin.Context) {
 	t, err := token(ctx)
 	if err != nil {
-		commonstl.SendBadRequestHeader(ctx, err)
+		commonstl.SendBadRequest(ctx, errorBadRequestHeader, err)
 		ctx.Abort()
 
 		return
@@ -43,13 +49,13 @@ func CheckUser(ctx *gin.Context) {
 
 	c, err := cookie(ctx)
 	if err != nil {
-		commonstl.SendBadRequestCookie(ctx, err)
+		commonstl.SendBadRequest(ctx, errorBadRequestCookie, err)
 		ctx.Abort()
 
 		return
 	}
 
-	userinfo, err := getUserInfo(t, c)
+	v, err := getUserInfo(t, c)
 	if err != nil {
 		commonstl.SendBadRequest(ctx, "", err)
 		ctx.Abort()
@@ -57,13 +63,13 @@ func CheckUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Set(user, userinfo)
+	ctx.Set(userKey, v)
 
 	ctx.Next()
 }
 
 func GetUser(ctx *gin.Context) (*domain.User, error) {
-	u, _ := ctx.Get(user)
+	u, _ := ctx.Get(userKey)
 	if userinfo, ok := u.(*domain.User); ok {
 		return userinfo, nil
 	}
@@ -80,7 +86,7 @@ func token(ctx *gin.Context) (t string, err error) {
 }
 
 func cookie(ctx *gin.Context) (c string, err error) {
-	if c, err = ctx.Cookie(yG); err != nil || len(c) == 0 {
+	if c, err = ctx.Cookie(cookieKey); err != nil || len(c) == 0 {
 		err = errors.New("invalid cookie")
 	}
 
@@ -89,13 +95,13 @@ func cookie(ctx *gin.Context) (c string, err error) {
 
 func getUserInfo(t, c string) (userinfo *domain.User, err error) {
 	var req *http.Request
-	req, err = http.NewRequest("GET", userinfoUrl, nil)
+	req, err = http.NewRequest("GET", userInfoURL, nil)
 	if err != nil {
 		return
 	}
 
 	req.Header.Set("token", t)
-	req.Header.Set("Cookie", yG+"="+c)
+	req.Header.Set("Cookie", cookieValue(c))
 
 	var result = struct {
 		Data struct {

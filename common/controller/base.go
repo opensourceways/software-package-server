@@ -14,14 +14,6 @@ func SendBadRequestParam(ctx *gin.Context, err error) {
 	ctx.JSON(http.StatusBadRequest, newResponseCodeMsg(errorBadRequestParam, err.Error()))
 }
 
-func SendBadRequestHeader(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusBadRequest, newResponseCodeMsg(errorBadRequestHeader, err.Error()))
-}
-
-func SendBadRequestCookie(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusBadRequest, newResponseCodeMsg(errorBadRequestCookie, err.Error()))
-}
-
 func SendCreateSuccess(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, newResponseCodeMsg("", "success"))
 }
