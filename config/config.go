@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/opensourceways/community-robot-lib/utils"
 
+	"github.com/opensourceways/software-package-server/common/controller/middleware"
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/messageimpl"
@@ -37,15 +38,11 @@ type PostgresqlConfig struct {
 	repositoryimpl.Config
 }
 
-type api struct {
-	UserinfoUrl string `json:"userinfo_url" required:"true"`
-}
-
 type Config struct {
 	MQ          messageimpl.Config `json:"mq"             required:"true"`
 	Postgresql  PostgresqlConfig   `json:"postgresql"     required:"true"`
 	SoftwarePkg dp.Config          `json:"software_pkg"   required:"true"`
-	Api         api                `json:"api"            required:"true"`
+	Api         middleware.Api     `json:"api"            required:"true"`
 }
 
 func (cfg *Config) configItems() []interface{} {

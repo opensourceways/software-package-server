@@ -33,24 +33,3 @@ func newResponseCodeMsg(code, msg string) ResponseData {
 		Msg:  msg,
 	}
 }
-
-func NewBadRequestHeader(msg string) ResponseData {
-	return ResponseData{
-		Code: errorBadRequestHeader,
-		Msg:  msg,
-	}
-}
-
-func NewBadRequestCookie(msg string) ResponseData {
-	return ResponseData{
-		Code: errorBadRequestCookie,
-		Msg:  msg,
-	}
-}
-
-func NewBadRequest(msg string) ResponseData {
-	return ResponseData{
-		Code: errorBadRequest,
-		Msg:  msg,
-	}
-}

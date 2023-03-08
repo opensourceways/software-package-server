@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-
-	"github.com/opensourceways/software-package-server/common/controller/middleware"
 	"github.com/opensourceways/software-package-server/softwarepkg/app"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
@@ -99,8 +96,4 @@ func (s softwarePkgListQuery) toCmd() (pkg app.CmdToListPkgs, err error) {
 	}
 
 	return
-}
-
-func toDomainUser(ctx *gin.Context) (user *domain.User, err error) {
-	return middleware.GetUser(ctx)
 }

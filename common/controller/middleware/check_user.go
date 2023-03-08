@@ -17,10 +17,14 @@ var (
 	client      utils.HttpClient
 )
 
+type Api struct {
+	UserInfoURL string `json:"user_info_url" required:"true"`
+}
+
 const (
 	headerPrivateToken = "PRIVATE-TOKEN"
 	yG                 = "_Y_G_"
-	user               = "user"
+	user               = "userinfo"
 )
 
 func Init(url string) {
@@ -28,64 +32,34 @@ func Init(url string) {
 	userinfoUrl = url
 }
 
-func CheckUser() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		token := ctx.GetHeader(headerPrivateToken)
-		if len(token) == 0 {
-			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequestHeader("no token"))
-			ctx.Abort()
+func CheckUser(ctx *gin.Context) {
+	t, err := token(ctx)
+	if err != nil {
+		commonstl.SendBadRequestHeader(ctx, err)
+		ctx.Abort()
 
-			return
-		}
-
-		cookie, err := ctx.Cookie(yG)
-		if err != nil || len(cookie) == 0 {
-			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequestCookie("no cookie"))
-			ctx.Abort()
-
-			return
-		}
-
-		req, _ := http.NewRequest("GET", userinfoUrl, nil)
-		req.Header.Set("token", token)
-		req.Header.Set("Cookie", yG+"="+cookie)
-
-		var result = struct {
-			Data struct {
-				Email    string `json:"email"`
-				Username string `json:"username"`
-			} `json:"data"`
-		}{}
-
-		code, _ := client.ForwardTo(req, &result)
-		if code == http.StatusUnauthorized {
-			ctx.JSON(http.StatusUnauthorized, commonstl.NewBadRequest("no login"))
-			ctx.Abort()
-
-			return
-		}
-
-		var userinfo domain.User
-		userinfo.Account, err = dp.NewAccount(result.Data.Username)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequest(err.Error()))
-			ctx.Abort()
-
-			return
-		}
-
-		userinfo.Email, err = dp.NewEmail(result.Data.Email)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequest(err.Error()))
-			ctx.Abort()
-
-			return
-		}
-
-		ctx.Set(user, &userinfo)
-
-		ctx.Next()
+		return
 	}
+
+	c, err := cookie(ctx)
+	if err != nil {
+		commonstl.SendBadRequestCookie(ctx, err)
+		ctx.Abort()
+
+		return
+	}
+
+	userinfo, err := getUserInfo(t, c)
+	if err != nil {
+		commonstl.SendBadRequest(ctx, "", err)
+		ctx.Abort()
+
+		return
+	}
+
+	ctx.Set(user, userinfo)
+
+	ctx.Next()
 }
 
 func GetUser(ctx *gin.Context) (*domain.User, error) {
@@ -95,4 +69,58 @@ func GetUser(ctx *gin.Context) (*domain.User, error) {
 	}
 
 	return nil, errors.New("no userinfo")
+}
+
+func token(ctx *gin.Context) (t string, err error) {
+	if t = ctx.GetHeader(headerPrivateToken); len(t) == 0 {
+		err = errors.New("invalid token")
+	}
+
+	return
+}
+
+func cookie(ctx *gin.Context) (c string, err error) {
+	if c, err = ctx.Cookie(yG); err != nil || len(c) == 0 {
+		err = errors.New("invalid cookie")
+	}
+
+	return
+}
+
+func getUserInfo(t, c string) (userinfo *domain.User, err error) {
+	var req *http.Request
+	req, err = http.NewRequest("GET", userinfoUrl, nil)
+	if err != nil {
+		return
+	}
+
+	req.Header.Set("token", t)
+	req.Header.Set("Cookie", yG+"="+c)
+
+	var result = struct {
+		Data struct {
+			Email    string `json:"email"`
+			Username string `json:"username"`
+		} `json:"data"`
+	}{}
+
+	code, _ := client.ForwardTo(req, &result)
+	if code == http.StatusUnauthorized {
+		err = errors.New("no login")
+
+		return
+	}
+
+	userinfo = new(domain.User)
+	userinfo.Account, err = dp.NewAccount(result.Data.Username)
+	if err != nil {
+		return
+	}
+
+	userinfo.Email, err = dp.NewEmail(result.Data.Email)
+	if err != nil {
+		return
+	}
+
+	return
 }
