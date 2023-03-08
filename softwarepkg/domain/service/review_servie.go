@@ -16,12 +16,12 @@ type SoftwarePkgReviewService interface {
 	AbandonPkg(pkg *domain.SoftwarePkgBasicInfo, user dp.Account) error
 }
 
-type reviewService struct {
-	message message.SoftwarePkgMessage
-}
-
 func NewReviewService(m message.SoftwarePkgMessage) SoftwarePkgReviewService {
 	return &reviewService{message: m}
+}
+
+type reviewService struct {
+	message message.SoftwarePkgMessage
 }
 
 func (s *reviewService) ApprovePkg(pkg *domain.SoftwarePkgBasicInfo, user dp.Account) error {

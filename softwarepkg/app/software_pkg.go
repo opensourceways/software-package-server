@@ -17,9 +17,9 @@ type SoftwarePkgService interface {
 	GetPkgReviewDetail(string) (SoftwarePkgReviewDTO, error)
 	ListPkgs(*CmdToListPkgs) (SoftwarePkgsDTO, error)
 
-	Approve(pid string, user dp.Account) (code string, err error)
-	Reject(pid string, user dp.Account) (code string, err error)
-	Abandon(pid string, user dp.Account) (code string, err error)
+	Approve(string, dp.Account) (string, error)
+	Reject(string, dp.Account) (string, error)
+	Abandon(string, dp.Account) (string, error)
 }
 
 var _ SoftwarePkgService = (*softwarePkgService)(nil)
@@ -27,12 +27,11 @@ var _ SoftwarePkgService = (*softwarePkgService)(nil)
 func NewSoftwarePkgService(
 	repo repository.SoftwarePkg,
 	message message.SoftwarePkgMessage,
-	reviewServie service.SoftwarePkgReviewService,
 ) *softwarePkgService {
 	return &softwarePkgService{
 		repo:         repo,
 		message:      message,
-		reviewServie: reviewServie,
+		reviewServie: service.NewReviewService(message),
 	}
 }
 

@@ -18,13 +18,14 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 		service: pkgService,
 	}
 
-	r.POST("/v1/softwarepkg", middleware.UserChecking().CheckUser, ctl.ApplyNewPkg)
+	m := middleware.UserChecking().CheckUser
+	r.POST("/v1/softwarepkg", m, ctl.ApplyNewPkg)
 	r.GET("/v1/softwarepkg", ctl.ListPkgs)
 	r.GET("/v1/softwarepkg/:id", ctl.Get)
 
-	r.GET("/v1/reviewcomment/approve/:id", middleware.UserChecking().CheckUser, ctl.Approve)
-	r.GET("/v1/reviewcomment/reject/:id", middleware.UserChecking().CheckUser, ctl.Reject)
-	r.GET("/v1/reviewcomment/abandon/:id", middleware.UserChecking().CheckUser, ctl.Abandon)
+	r.PUT("/v1/softwarepkg/:id/review/approve", m, ctl.Approve)
+	r.PUT("/v1/softwarepkg/:id/review/reject", m, ctl.Reject)
+	r.PUT("/v1/softwarepkg/:id/review/abandon", m, ctl.Abandon)
 }
 
 // ApplyNewPkg
@@ -122,21 +123,21 @@ func (ctl SoftwarePkgController) Get(ctx *gin.Context) {
 // @Tags  SoftwarePkg
 // @Accept json
 // @Param	id  path	 string	 true	"id of software package"
-// @Success 201 {object} ResponseData
+// @Success 202 {object} ResponseData
 // @Failure 400 {object} ResponseData
-// @Router /v1/reviewcomment/approve/{id} [get]
+// @Router /v1/softwarepkg/{id}/review/approve [put]
 func (ctl SoftwarePkgController) Approve(ctx *gin.Context) {
 	user, err := middleware.UserChecking().FetchUser(ctx)
 	if err != nil {
-		commonctl.SendBadRequest(ctx, "", err)
+		commonctl.SendFailedResp(ctx, "", err)
 
 		return
 	}
 
 	if code, err := ctl.service.Approve(ctx.Param("id"), user.Account); err != nil {
-		commonctl.SendBadRequest(ctx, code, err)
+		commonctl.SendFailedResp(ctx, code, err)
 	} else {
-		commonctl.SendCreateSuccess(ctx)
+		commonctl.SendRespOfPut(ctx)
 	}
 }
 
@@ -146,21 +147,21 @@ func (ctl SoftwarePkgController) Approve(ctx *gin.Context) {
 // @Tags  SoftwarePkg
 // @Accept json
 // @Param	id  path	 string	 true	"id of software package"
-// @Success 201 {object} ResponseData
+// @Success 202 {object} ResponseData
 // @Failure 400 {object} ResponseData
-// @Router /v1/reviewcomment/reject/{id} [get]
+// @Router /v1/softwarepkg/{id}/review/reject [put]
 func (ctl SoftwarePkgController) Reject(ctx *gin.Context) {
 	user, err := middleware.UserChecking().FetchUser(ctx)
 	if err != nil {
-		commonctl.SendBadRequest(ctx, "", err)
+		commonctl.SendFailedResp(ctx, "", err)
 
 		return
 	}
 
 	if code, err := ctl.service.Reject(ctx.Param("id"), user.Account); err != nil {
-		commonctl.SendBadRequest(ctx, code, err)
+		commonctl.SendFailedResp(ctx, code, err)
 	} else {
-		commonctl.SendCreateSuccess(ctx)
+		commonctl.SendRespOfPut(ctx)
 	}
 }
 
@@ -170,20 +171,20 @@ func (ctl SoftwarePkgController) Reject(ctx *gin.Context) {
 // @Tags  SoftwarePkg
 // @Accept json
 // @Param	id  path	 string	 true	"id of software package"
-// @Success 201 {object} ResponseData
+// @Success 202 {object} ResponseData
 // @Failure 400 {object} ResponseData
-// @Router /v1/reviewcomment/abandon/{id} [get]
+// @Router /v1/softwarepkg/{id}/review/abandon [put]
 func (ctl SoftwarePkgController) Abandon(ctx *gin.Context) {
 	user, err := middleware.UserChecking().FetchUser(ctx)
 	if err != nil {
-		commonctl.SendBadRequest(ctx, "", err)
+		commonctl.SendFailedResp(ctx, "", err)
 
 		return
 	}
 
 	if code, err := ctl.service.Abandon(ctx.Param("id"), user.Account); err != nil {
-		commonctl.SendBadRequest(ctx, code, err)
+		commonctl.SendFailedResp(ctx, code, err)
 	} else {
-		commonctl.SendCreateSuccess(ctx)
+		commonctl.SendRespOfPut(ctx)
 	}
 }
