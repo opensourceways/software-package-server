@@ -1,9 +1,9 @@
 package controller
 
 const (
+	errorBadRequest       = "bad_request"
 	errorBadRequestBody   = "bad_request_body"
 	errorBadRequestParam  = "bad_request_param"
-	errorBadRequest       = "bad_request"
 	errorBadRequestHeader = "bad_request_header"
 	errorBadRequestCookie = "bad_request_cookie"
 )

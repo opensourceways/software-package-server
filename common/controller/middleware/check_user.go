@@ -1,12 +1,15 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/opensourceways/community-robot-lib/utils"
 
 	commonstl "github.com/opensourceways/software-package-server/common/controller"
+	"github.com/opensourceways/software-package-server/softwarepkg/domain"
+	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
 var (
@@ -17,9 +20,7 @@ var (
 const (
 	headerPrivateToken = "PRIVATE-TOKEN"
 	yG                 = "_Y_G_"
-	giteeUser          = "giteeUser"
 	user               = "user"
-	email              = "email"
 )
 
 func Init(url string) {
@@ -32,7 +33,6 @@ func CheckUser() gin.HandlerFunc {
 		token := ctx.GetHeader(headerPrivateToken)
 		if len(token) == 0 {
 			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequestHeader("no token"))
-
 			ctx.Abort()
 
 			return
@@ -41,7 +41,6 @@ func CheckUser() gin.HandlerFunc {
 		cookie, err := ctx.Cookie(yG)
 		if err != nil || len(cookie) == 0 {
 			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequestCookie("no cookie"))
-
 			ctx.Abort()
 
 			return
@@ -51,41 +50,49 @@ func CheckUser() gin.HandlerFunc {
 		req.Header.Set("token", token)
 		req.Header.Set("Cookie", yG+"="+cookie)
 
-		var result Userinfo
+		var result = struct {
+			Data struct {
+				Email    string `json:"email"`
+				Username string `json:"username"`
+			} `json:"data"`
+		}{}
+
 		code, _ := client.ForwardTo(req, &result)
 		if code == http.StatusUnauthorized {
 			ctx.JSON(http.StatusUnauthorized, commonstl.NewBadRequest("no login"))
-
 			ctx.Abort()
 
 			return
 		}
 
-		var giteeUserName string
-		username := result.Data.Username
-		loginEmail := result.Data.Email
-		for _, v := range result.Data.Identities {
-			if v.Identity == "gitee" {
-				giteeUserName = v.LoginName
-			}
+		var userinfo domain.User
+		userinfo.Account, err = dp.NewAccount(result.Data.Username)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequest(err.Error()))
+			ctx.Abort()
+
+			return
 		}
 
-		ctx.Set(user, username)
-		ctx.Set(giteeUser, giteeUserName)
-		ctx.Set(email, loginEmail)
+		userinfo.Email, err = dp.NewEmail(result.Data.Email)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, commonstl.NewBadRequest(err.Error()))
+			ctx.Abort()
+
+			return
+		}
+
+		ctx.Set(user, &userinfo)
 
 		ctx.Next()
 	}
 }
 
-func UserName(ctx *gin.Context) string {
-	return ctx.GetString(user)
-}
+func GetUser(ctx *gin.Context) (*domain.User, error) {
+	u, _ := ctx.Get(user)
+	if userinfo, ok := u.(*domain.User); ok {
+		return userinfo, nil
+	}
 
-func GiteeUserName(ctx *gin.Context) string {
-	return ctx.GetString(giteeUser)
-}
-
-func GetEmail(ctx *gin.Context) string {
-	return ctx.GetString(email)
+	return nil, errors.New("no userinfo")
 }

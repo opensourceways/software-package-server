@@ -8,8 +8,8 @@ import (
 	liboptions "github.com/opensourceways/community-robot-lib/options"
 	"github.com/sirupsen/logrus"
 
+	"github.com/opensourceways/software-package-server/common/controller/middleware"
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
-	"github.com/opensourceways/software-package-server/common/middleware"
 	"github.com/opensourceways/software-package-server/config"
 	"github.com/opensourceways/software-package-server/server"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"

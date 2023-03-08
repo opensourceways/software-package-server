@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	commonctl "github.com/opensourceways/software-package-server/common/controller"
-	"github.com/opensourceways/software-package-server/common/middleware"
+	"github.com/opensourceways/software-package-server/common/controller/middleware"
 	"github.com/opensourceways/software-package-server/softwarepkg/app"
 )
 
@@ -43,12 +43,12 @@ func (ctl SoftwarePkgController) ApplyNewPkg(ctx *gin.Context) {
 
 	user, err := toDomainUser(ctx)
 	if err != nil {
-		ctl.SendBadRequestParam(ctx, err)
+		ctl.SendBadRequest(ctx, "", err)
 
 		return
 	}
 
-	cmd, err := req.toCmd(&user)
+	cmd, err := req.toCmd(user)
 	if err != nil {
 		ctl.SendBadRequestParam(ctx, err)
 
