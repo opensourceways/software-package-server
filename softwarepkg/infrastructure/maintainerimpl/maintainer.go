@@ -3,6 +3,7 @@ package maintainerimpl
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/opensourceways/community-robot-lib/utils"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/maintainer"
 )
 
-func NewMmaintainerImpl(cfg *Config) maintainer.Maintainer {
+func NewMaintainerImpl(cfg *Config) maintainer.Maintainer {
 	return maintainerImpl{
 		permissionURL: cfg.PermissionURL,
 		community:     cfg.Community,
@@ -32,11 +33,24 @@ type SigPermission struct {
 	} `json:"data"`
 }
 
+func (s SigPermission) checkPermission(sig string) (flag bool) {
+	for _, v := range s.Data {
+		if v.Sig == sig && strings.Contains(strings.Join(v.Type, ","), "maintainers") {
+			flag = true
+			break
+		}
+	}
+
+	return
+}
+
 func (m maintainerImpl) baseUrl(user string) string {
 	return fmt.Sprintf(m.permissionURL, m.community, user)
 }
 
-func (m maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp.Account) (flag bool, err error) {
+func (m maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp.Account) (
+	flag bool, err error,
+) {
 	req, err := http.NewRequest("GET", m.baseUrl(user.Account()), nil)
 	if err != nil {
 		return
@@ -49,16 +63,8 @@ func (m maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, user dp
 	}
 
 	sig := info.Application.ImportingPkgSig.ImportingPkgSig()
-	for _, v := range res.Data {
-		if v.Sig == sig {
-			for _, s := range v.Type {
-				if s == "maintainers" {
-					flag = true
-					return
-				}
-			}
-		}
-	}
+
+	flag = res.checkPermission(sig)
 
 	return
 }

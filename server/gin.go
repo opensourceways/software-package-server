@@ -59,7 +59,7 @@ func initSoftwarePkgService(v1 *gin.RouterGroup, cfg *config.Config) {
 		&cfg.Postgresql.Config,
 	)
 
-	maintainer := maintainerimpl.NewMmaintainerImpl(&cfg.Maintainer)
+	maintainer := maintainerimpl.NewMaintainerImpl(&cfg.Maintainer)
 
 	controller.AddRouteForSoftwarePkgController(
 		v1, softwarepkgapp.NewSoftwarePkgService(
