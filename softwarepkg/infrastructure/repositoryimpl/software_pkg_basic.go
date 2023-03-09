@@ -20,16 +20,17 @@ func (s softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, vers
 	if err != nil {
 		return err
 	}
-
-	filter := SoftwarePkgBasicDO{Id: u, Version: version}
+	filter := map[string]any{
+		fieldId:      pkg.Id,
+		fieldVersion: version,
+	}
 	var do SoftwarePkgBasicDO
 	s.toSoftwarePkgBasicDO(pkg, &do)
 
 	do.UpdatedAt = utils.Now()
 	do.Id = u
-	do.Version = version + 1
 
-	if err = s.basicDBCli.UpdateRecord(&filter, &do); err != nil && s.basicDBCli.IsRowNotFound(err) {
+	if err = s.basicDBCli.UpdateRecord(filter, &do); err != nil && s.basicDBCli.IsRowNotFound(err) {
 		return commonrepo.NewErrorResourceNotFound(err)
 	}
 
@@ -51,7 +52,7 @@ func (s softwarePkgBasic) FindSoftwarePkgBasicInfo(pid string) (
 			err = commonrepo.NewErrorResourceNotFound(err)
 		}
 	} else {
-		version = do.Version
+		version = int(do.Version.Int64)
 
 		info, err = do.toSoftwarePkgBasicInfo()
 	}

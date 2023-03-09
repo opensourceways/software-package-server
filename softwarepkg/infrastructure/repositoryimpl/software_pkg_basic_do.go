@@ -3,6 +3,7 @@ package repositoryimpl
 import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/plugin/optimisticlock"
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
@@ -11,6 +12,7 @@ import (
 const (
 	fieldAppliedAt = "applied_at"
 	fieldVersion   = "version"
+	fieldId        = "uuid"
 )
 
 func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo, do *SoftwarePkgBasicDO) {
@@ -45,24 +47,24 @@ func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo,
 
 type SoftwarePkgBasicDO struct {
 	// must set "uuid" as the name of column
-	Id              uuid.UUID      `gorm:"column:uuid;type:uuid"`
-	PackageName     string         `gorm:"column:package_name"`
-	Importer        string         `gorm:"column:importer"`
-	RepoLink        string         `gorm:"column:repo_link"`
-	Phase           string         `gorm:"column:phase"`
-	SourceCode      string         `gorm:"column:source_code"`
-	License         string         `gorm:"column:license"`
-	PackageDesc     string         `gorm:"column:package_desc"`
-	PackagePlatform string         `gorm:"column:package_platform"`
-	RelevantPR      string         `gorm:"column:relevant_pr"`
-	Sig             string         `gorm:"column:sig"`
-	ReasonToImport  string         `gorm:"column:reason_to_import"`
-	ApprovedBy      pq.StringArray `gorm:"column:approvedby;type:text[];default:'{}'"`
-	RejectedBy      pq.StringArray `gorm:"column:rejectedby;type:text[];default:'{}'"`
-	AppliedAt       int64          `gorm:"column:applied_at"`
-	UpdatedAt       int64          `gorm:"column:updated_at"`
-	Frozen          bool           `gorm:"column:frozen"`
-	Version         int            `gorm:"column:version"`
+	Id              uuid.UUID              `gorm:"column:uuid;type:uuid"`
+	PackageName     string                 `gorm:"column:package_name"`
+	Importer        string                 `gorm:"column:importer"`
+	RepoLink        string                 `gorm:"column:repo_link"`
+	Phase           string                 `gorm:"column:phase"`
+	SourceCode      string                 `gorm:"column:source_code"`
+	License         string                 `gorm:"column:license"`
+	PackageDesc     string                 `gorm:"column:package_desc"`
+	PackagePlatform string                 `gorm:"column:package_platform"`
+	RelevantPR      string                 `gorm:"column:relevant_pr"`
+	Sig             string                 `gorm:"column:sig"`
+	ReasonToImport  string                 `gorm:"column:reason_to_import"`
+	ApprovedBy      pq.StringArray         `gorm:"column:approvedby;type:text[];default:'{}'"`
+	RejectedBy      pq.StringArray         `gorm:"column:rejectedby;type:text[];default:'{}'"`
+	AppliedAt       int64                  `gorm:"column:applied_at"`
+	UpdatedAt       int64                  `gorm:"column:updated_at"`
+	Frozen          bool                   `gorm:"column:frozen"`
+	Version         optimisticlock.Version `gorm:"column:version"`
 }
 
 func (do *SoftwarePkgBasicDO) toSoftwarePkgBasicInfo() (info domain.SoftwarePkgBasicInfo, err error) {
