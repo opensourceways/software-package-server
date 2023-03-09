@@ -20,10 +20,12 @@ func (s softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, vers
 	if err != nil {
 		return err
 	}
+
 	filter := map[string]any{
 		fieldId:      pkg.Id,
 		fieldVersion: version,
 	}
+
 	var do SoftwarePkgBasicDO
 	s.toSoftwarePkgBasicDO(pkg, &do)
 
@@ -31,7 +33,7 @@ func (s softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, vers
 	do.Id = u
 
 	if err = s.basicDBCli.UpdateRecord(filter, &do); err != nil && s.basicDBCli.IsRowNotFound(err) {
-		return commonrepo.NewErrorResourceNotFound(err)
+		return commonrepo.NewErrorConcurrentUpdating(err)
 	}
 
 	return err

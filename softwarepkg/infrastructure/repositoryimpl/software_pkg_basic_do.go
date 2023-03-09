@@ -32,8 +32,8 @@ func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo,
 		AppliedAt:       pkg.AppliedAt,
 		UpdatedAt:       pkg.AppliedAt,
 		Frozen:          pkg.Frozen,
-		ApprovedBy:      toPqStringArray(pkg.ApprovedBy),
-		RejectedBy:      toPqStringArray(pkg.RejectedBy),
+		ApprovedBy:      toStringArray(pkg.ApprovedBy),
+		RejectedBy:      toStringArray(pkg.RejectedBy),
 	}
 
 	if pkg.RepoLink != nil {
@@ -152,7 +152,7 @@ func (do *SoftwarePkgBasicDO) toSoftwarePkgApplication(app *domain.SoftwarePkgAp
 	return
 }
 
-func toPqStringArray(v []dp.Account) (arr pq.StringArray) {
+func toStringArray(v []dp.Account) (arr pq.StringArray) {
 	arr = make(pq.StringArray, len(v))
 	for i, account := range v {
 		arr[i] = account.Account()
