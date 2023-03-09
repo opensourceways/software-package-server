@@ -11,8 +11,21 @@ import (
 )
 
 const (
-	fieldAppliedAt = "applied_at"
-	fieldVersion   = "version"
+	fieldAppliedAt      = "applied_at"
+	fieldVersion        = "version"
+	fieldSig            = "sig"
+	fieldPnase          = "phase"
+	fieldFrozen         = "frozen"
+	fieldLicense        = "license"
+	fieldRepoLink       = "repo_link"
+	fieldUpdatedAt      = "updated_at"
+	fieldApprovedby     = "approvedby"
+	fieldRejectedby     = "rejectedby"
+	fieldSourceCode     = "source_code"
+	fieldPackageDesc    = "package_desc"
+	fieldReviewResult   = "review_result"
+	fieldReasonToImport = "reason_to_import"
+	fieldRelevantPR     = "relevant_pr"
 )
 
 func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo, do *SoftwarePkgBasicDO) {
@@ -37,28 +50,28 @@ func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo,
 
 func (s softwarePkgBasic) toSoftwarePkgUpdate(pkg *domain.SoftwarePkgBasicInfo) map[string]any {
 	updates := map[string]any{
-		"sig":              pkg.Application.ImportingPkgSig.ImportingPkgSig(),
-		"phase":            pkg.Phase.PackagePhase(),
-		"frozen":           pkg.Frozen,
-		"license":          pkg.Application.SourceCode.License.License(),
-		"version":          gorm.Expr(fieldVersion+"+ ?", 1),
-		"updated_at":       utils.Now(),
-		"approvedby":       toPqStringArray(pkg.ApprovedBy),
-		"rejectedby":       toPqStringArray(pkg.RejectedBy),
-		"source_code":      pkg.Application.SourceCode.Address.URL(),
-		"package_desc":     pkg.Application.PackageDesc.PackageDesc(),
-		"reason_to_import": pkg.Application.ReasonToImportPkg.ReasonToImportPkg(),
+		fieldSig:            pkg.Application.ImportingPkgSig.ImportingPkgSig(),
+		fieldPnase:          pkg.Phase.PackagePhase(),
+		fieldFrozen:         pkg.Frozen,
+		fieldLicense:        pkg.Application.SourceCode.License.License(),
+		fieldVersion:        gorm.Expr(fieldVersion+"+ ?", 1),
+		fieldUpdatedAt:      utils.Now(),
+		fieldApprovedby:     toPqStringArray(pkg.ApprovedBy),
+		fieldRejectedby:     toPqStringArray(pkg.RejectedBy),
+		fieldSourceCode:     pkg.Application.SourceCode.Address.URL(),
+		fieldPackageDesc:    pkg.Application.PackageDesc.PackageDesc(),
+		fieldReasonToImport: pkg.Application.ReasonToImportPkg.ReasonToImportPkg(),
 	}
 	if pkg.RepoLink != nil {
-		updates["repo_link"] = pkg.RepoLink.URL()
+		updates[fieldRepoLink] = pkg.RepoLink.URL()
 	}
 
 	if pkg.ReviewResult != nil {
-		updates["review_result"] = pkg.ReviewResult.PackageReviewResult()
+		updates[fieldReviewResult] = pkg.ReviewResult.PackageReviewResult()
 	}
 
 	if pkg.RelevantPR != nil {
-		updates["pull_request_link"] = pkg.RelevantPR.URL()
+		updates[fieldRelevantPR] = pkg.RelevantPR.URL()
 	}
 
 	return updates
