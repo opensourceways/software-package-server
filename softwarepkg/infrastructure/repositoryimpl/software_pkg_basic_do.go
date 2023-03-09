@@ -3,13 +3,16 @@ package repositoryimpl
 import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
+	"github.com/opensourceways/software-package-server/utils"
 )
 
 const (
 	fieldAppliedAt = "applied_at"
+	fieldVersion   = "version"
 )
 
 func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo, do *SoftwarePkgBasicDO) {
@@ -28,7 +31,37 @@ func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo,
 		ReasonToImport:  app.ReasonToImportPkg.ReasonToImportPkg(),
 		AppliedAt:       pkg.AppliedAt,
 		UpdatedAt:       pkg.AppliedAt,
+		Frozen:          pkg.Frozen,
 	}
+}
+
+func (s softwarePkgBasic) toSoftwarePkgUpdate(pkg *domain.SoftwarePkgBasicInfo) map[string]any {
+	updates := map[string]any{
+		"sig":              pkg.Application.ImportingPkgSig.ImportingPkgSig(),
+		"phase":            pkg.Phase.PackagePhase(),
+		"frozen":           pkg.Frozen,
+		"license":          pkg.Application.SourceCode.License.License(),
+		"version":          gorm.Expr(fieldVersion+"+ ?", 1),
+		"updated_at":       utils.Now(),
+		"approvedby":       toPqStringArray(pkg.ApprovedBy),
+		"rejectedby":       toPqStringArray(pkg.RejectedBy),
+		"source_code":      pkg.Application.SourceCode.Address.URL(),
+		"package_desc":     pkg.Application.PackageDesc.PackageDesc(),
+		"reason_to_import": pkg.Application.ReasonToImportPkg.ReasonToImportPkg(),
+	}
+	if pkg.RepoLink != nil {
+		updates["repo_link"] = pkg.RepoLink.URL()
+	}
+
+	if pkg.ReviewResult != nil {
+		updates["review_result"] = pkg.ReviewResult.PackageReviewResult()
+	}
+
+	if pkg.RelevantPR != nil {
+		updates["pull_request_link"] = pkg.RelevantPR.URL()
+	}
+
+	return updates
 }
 
 type SoftwarePkgBasicDO struct {
@@ -43,12 +76,14 @@ type SoftwarePkgBasicDO struct {
 	License         string         `gorm:"column:license"`
 	PackageDesc     string         `gorm:"column:package_desc"`
 	PackagePlatform string         `gorm:"column:package_platform"`
+	RelevantPR      string         `gorm:"column:relevant_pr"`
 	Sig             string         `gorm:"column:sig"`
 	ReasonToImport  string         `gorm:"column:reason_to_import"`
 	ApprovedBy      pq.StringArray `gorm:"column:approvedby;type:text[];default:'{}'"`
 	RejectedBy      pq.StringArray `gorm:"column:rejectedby;type:text[];default:'{}'"`
 	AppliedAt       int64          `gorm:"column:applied_at"`
 	UpdatedAt       int64          `gorm:"column:updated_at"`
+	Frozen          bool           `gorm:"column:frozen"`
 	Version         int            `gorm:"column:version"`
 }
 
@@ -61,6 +96,18 @@ func (do *SoftwarePkgBasicDO) toSoftwarePkgBasicInfo() (info domain.SoftwarePkgB
 
 	if do.RepoLink != "" {
 		if info.RepoLink, err = dp.NewURL(do.RepoLink); err != nil {
+			return
+		}
+	}
+
+	if do.RelevantPR != "" {
+		if info.RelevantPR, err = dp.NewURL(do.RelevantPR); err != nil {
+			return
+		}
+	}
+
+	if do.ReviewResult != "" {
+		if info.ReviewResult, err = dp.NewPackageReviewResult(do.ReviewResult); err != nil {
 			return
 		}
 	}
@@ -84,6 +131,8 @@ func (do *SoftwarePkgBasicDO) toSoftwarePkgBasicInfo() (info domain.SoftwarePkgB
 	}
 
 	info.RejectedBy, err = do.toAccounts(do.RejectedBy)
+
+	info.Frozen = do.Frozen
 
 	return
 }
@@ -125,6 +174,15 @@ func (do *SoftwarePkgBasicDO) toSoftwarePkgApplication(app *domain.SoftwarePkgAp
 	}
 
 	app.SourceCode.Address, err = dp.NewURL(do.SourceCode)
+
+	return
+}
+
+func toPqStringArray(v []dp.Account) (arr pq.StringArray) {
+	arr = make(pq.StringArray, len(v))
+	for i, account := range v {
+		arr[i] = account.Account()
+	}
 
 	return
 }

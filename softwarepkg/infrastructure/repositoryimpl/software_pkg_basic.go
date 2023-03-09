@@ -14,12 +14,23 @@ type softwarePkgBasic struct {
 	basicDBCli dbClient
 }
 
-func (t softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, version int) error {
-	//TODO implement me
-	return nil
+func (s softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, version int) error {
+	u, err := uuid.Parse(pkg.Id)
+	if err != nil {
+		return err
+	}
+
+	filter := SoftwarePkgBasicDO{Id: u, Version: version}
+	updates := s.toSoftwarePkgUpdate(pkg)
+
+	if err = s.basicDBCli.UpdateRecord(&filter, updates); err != nil && s.basicDBCli.IsRowNotFound(err) {
+		err = commonrepo.NewErrorResourceNotFound(err)
+	}
+
+	return err
 }
 
-func (t softwarePkgBasic) FindSoftwarePkgBasicInfo(pid string) (
+func (s softwarePkgBasic) FindSoftwarePkgBasicInfo(pid string) (
 	info domain.SoftwarePkgBasicInfo, version int, err error,
 ) {
 	v, err := uuid.Parse(pid)
@@ -29,8 +40,8 @@ func (t softwarePkgBasic) FindSoftwarePkgBasicInfo(pid string) (
 
 	var do SoftwarePkgBasicDO
 
-	if err = t.basicDBCli.GetRecord(&SoftwarePkgBasicDO{Id: v}, &do); err != nil {
-		if t.basicDBCli.IsRowNotFound(err) {
+	if err = s.basicDBCli.GetRecord(&SoftwarePkgBasicDO{Id: v}, &do); err != nil {
+		if s.basicDBCli.IsRowNotFound(err) {
 			err = commonrepo.NewErrorResourceNotFound(err)
 		}
 	} else {
@@ -42,7 +53,7 @@ func (t softwarePkgBasic) FindSoftwarePkgBasicInfo(pid string) (
 	return
 }
 
-func (t softwarePkgBasic) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs) (
+func (s softwarePkgBasic) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs) (
 	r []domain.SoftwarePkgBasicInfo, total int, err error,
 ) {
 	var filter SoftwarePkgBasicDO
@@ -54,13 +65,13 @@ func (t softwarePkgBasic) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs
 		filter.Phase = pkgs.Phase.PackagePhase()
 	}
 
-	if total, err = t.basicDBCli.Count(&filter); err != nil || total == 0 {
+	if total, err = s.basicDBCli.Count(&filter); err != nil || total == 0 {
 		return
 	}
 
 	var dos []SoftwarePkgBasicDO
 
-	err = t.basicDBCli.GetRecords(
+	err = s.basicDBCli.GetRecords(
 		&filter, &dos,
 		postgresql.Pagination{
 			PageNum:      pkgs.PageNum,
@@ -84,17 +95,19 @@ func (t softwarePkgBasic) FindSoftwarePkgs(pkgs repository.OptToFindSoftwarePkgs
 	return
 }
 
-func (t softwarePkgBasic) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error {
+func (s softwarePkgBasic) AddSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo) error {
 	var do SoftwarePkgBasicDO
-	t.toSoftwarePkgBasicDO(pkg, &do)
+	s.toSoftwarePkgBasicDO(pkg, &do)
 
-	err := t.basicDBCli.Insert(
+	pkg.Id = do.Id.String()
+
+	err := s.basicDBCli.Insert(
 		&SoftwarePkgBasicDO{
-			PackageName: pkg.PkgName.PackageName(),
+			PackageName: do.PackageName,
 		},
 		&do,
 	)
-	if err != nil && t.basicDBCli.IsRowExists(err) {
+	if err != nil && s.basicDBCli.IsRowExists(err) {
 		err = commonrepo.NewErrorDuplicateCreating(err)
 	}
 

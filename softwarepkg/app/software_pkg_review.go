@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 
+	commonrepo "github.com/opensourceways/software-package-server/common/domain/repository"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
@@ -48,11 +49,11 @@ func (s *softwarePkgService) Approve(pid string, user dp.Account) (code string, 
 		return
 	}
 
-	if err = s.reviewServie.ApprovePkg(&pkg, user); err == nil {
-		err = s.repo.SaveSoftwarePkg(&pkg, version)
+	if err = s.reviewServie.ApprovePkg(&pkg, user); err != nil {
+		return
 	}
 
-	return
+	return s.saveSoftwarePkg(&pkg, version)
 }
 
 func (s *softwarePkgService) Reject(pid string, user dp.Account) (code string, err error) {
@@ -65,11 +66,11 @@ func (s *softwarePkgService) Reject(pid string, user dp.Account) (code string, e
 		return
 	}
 
-	if err = s.reviewServie.RejectPkg(&pkg, user); err == nil {
-		err = s.repo.SaveSoftwarePkg(&pkg, version)
+	if err = s.reviewServie.RejectPkg(&pkg, user); err != nil {
+		return
 	}
 
-	return
+	return s.saveSoftwarePkg(&pkg, version)
 }
 
 func (s *softwarePkgService) Abandon(pid string, user dp.Account) (code string, err error) {
@@ -78,11 +79,11 @@ func (s *softwarePkgService) Abandon(pid string, user dp.Account) (code string, 
 		return
 	}
 
-	if err = s.reviewServie.AbandonPkg(&pkg, user); err == nil {
-		err = s.repo.SaveSoftwarePkg(&pkg, version)
+	if err = s.reviewServie.AbandonPkg(&pkg, user); err != nil {
+		return
 	}
 
-	return
+	return s.saveSoftwarePkg(&pkg, version)
 }
 
 func (s *softwarePkgService) checkPermission(pkg *domain.SoftwarePkgBasicInfo, user dp.Account) (
@@ -96,6 +97,16 @@ func (s *softwarePkgService) checkPermission(pkg *domain.SoftwarePkgBasicInfo, u
 	if !b {
 		code = errorSoftwarePkgNoPermission
 		err = errors.New("no permission")
+	}
+
+	return
+}
+
+func (s *softwarePkgService) saveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, version int) (
+	code string, err error,
+) {
+	if err = s.repo.SaveSoftwarePkg(pkg, version); commonrepo.IsErrorResourceNotFound(err) {
+		code = errorNoMatchRecord
 	}
 
 	return
