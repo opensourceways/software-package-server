@@ -26,7 +26,7 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 	r.PUT("/v1/softwarepkg/:id/review/approve", m, ctl.Approve)
 	r.PUT("/v1/softwarepkg/:id/review/reject", m, ctl.Reject)
 	r.PUT("/v1/softwarepkg/:id/review/abandon", m, ctl.Abandon)
-	r.POST("/v1/softwarepkg/:id/review", m, ctl.NewReviewComment)
+	r.POST("/v1/softwarepkg/:id/review/comment", m, ctl.NewReviewComment)
 }
 
 // ApplyNewPkg
@@ -199,7 +199,7 @@ func (ctl SoftwarePkgController) Abandon(ctx *gin.Context) {
 // @Param	id     path	 string	                 true	"id of software package"
 // @Success 201 {object} ResponseData
 // @Failure 400 {object} ResponseData
-// @Router /v1/softwarepkg/{id}/review [post]
+// @Router /v1/softwarepkg/{id}/review/comment [post]
 func (ctl SoftwarePkgController) NewReviewComment(ctx *gin.Context) {
 	user, err := middleware.UserChecking().FetchUser(ctx)
 	if err != nil {
