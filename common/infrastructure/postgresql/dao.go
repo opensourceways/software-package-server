@@ -103,7 +103,7 @@ func (t dbTable) GetRecord(filter, result interface{}) error {
 }
 
 func (t dbTable) UpdateRecord(filter, update interface{}) (err error) {
-	query := db.Table(t.name).Where(filter).UpdateColumns(update)
+	query := db.Table(t.name).Where(filter).Updates(update)
 	if err = query.Error; err != nil {
 		return
 	}

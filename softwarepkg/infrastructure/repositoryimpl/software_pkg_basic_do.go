@@ -3,29 +3,14 @@ package repositoryimpl
 import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
-	"github.com/opensourceways/software-package-server/utils"
 )
 
 const (
-	fieldAppliedAt      = "applied_at"
-	fieldVersion        = "version"
-	fieldSig            = "sig"
-	fieldPnase          = "phase"
-	fieldFrozen         = "frozen"
-	fieldLicense        = "license"
-	fieldRepoLink       = "repo_link"
-	fieldUpdatedAt      = "updated_at"
-	fieldApprovedby     = "approvedby"
-	fieldRejectedby     = "rejectedby"
-	fieldSourceCode     = "source_code"
-	fieldPackageDesc    = "package_desc"
-	fieldReviewResult   = "review_result"
-	fieldReasonToImport = "reason_to_import"
-	fieldRelevantPR     = "relevant_pr"
+	fieldAppliedAt = "applied_at"
+	fieldVersion   = "version"
 )
 
 func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo, do *SoftwarePkgBasicDO) {
@@ -45,36 +30,17 @@ func (s softwarePkgBasic) toSoftwarePkgBasicDO(pkg *domain.SoftwarePkgBasicInfo,
 		AppliedAt:       pkg.AppliedAt,
 		UpdatedAt:       pkg.AppliedAt,
 		Frozen:          pkg.Frozen,
+		ApprovedBy:      toPqStringArray(pkg.ApprovedBy),
+		RejectedBy:      toPqStringArray(pkg.RejectedBy),
 	}
-}
 
-func (s softwarePkgBasic) toSoftwarePkgUpdate(pkg *domain.SoftwarePkgBasicInfo) map[string]any {
-	updates := map[string]any{
-		fieldSig:            pkg.Application.ImportingPkgSig.ImportingPkgSig(),
-		fieldPnase:          pkg.Phase.PackagePhase(),
-		fieldFrozen:         pkg.Frozen,
-		fieldLicense:        pkg.Application.SourceCode.License.License(),
-		fieldVersion:        gorm.Expr(fieldVersion+"+ ?", 1),
-		fieldUpdatedAt:      utils.Now(),
-		fieldApprovedby:     toPqStringArray(pkg.ApprovedBy),
-		fieldRejectedby:     toPqStringArray(pkg.RejectedBy),
-		fieldSourceCode:     pkg.Application.SourceCode.Address.URL(),
-		fieldPackageDesc:    pkg.Application.PackageDesc.PackageDesc(),
-		fieldReasonToImport: pkg.Application.ReasonToImportPkg.ReasonToImportPkg(),
-	}
 	if pkg.RepoLink != nil {
-		updates[fieldRepoLink] = pkg.RepoLink.URL()
-	}
-
-	if pkg.ReviewResult != nil {
-		updates[fieldReviewResult] = pkg.ReviewResult.PackageReviewResult()
+		do.RepoLink = pkg.RepoLink.URL()
 	}
 
 	if pkg.RelevantPR != nil {
-		updates[fieldRelevantPR] = pkg.RelevantPR.URL()
+		do.RelevantPR = pkg.RelevantPR.URL()
 	}
-
-	return updates
 }
 
 type SoftwarePkgBasicDO struct {
@@ -84,7 +50,6 @@ type SoftwarePkgBasicDO struct {
 	Importer        string         `gorm:"column:importer"`
 	RepoLink        string         `gorm:"column:repo_link"`
 	Phase           string         `gorm:"column:phase"`
-	ReviewResult    string         `gorm:"column:review_result"`
 	SourceCode      string         `gorm:"column:source_code"`
 	License         string         `gorm:"column:license"`
 	PackageDesc     string         `gorm:"column:package_desc"`
@@ -115,12 +80,6 @@ func (do *SoftwarePkgBasicDO) toSoftwarePkgBasicInfo() (info domain.SoftwarePkgB
 
 	if do.RelevantPR != "" {
 		if info.RelevantPR, err = dp.NewURL(do.RelevantPR); err != nil {
-			return
-		}
-	}
-
-	if do.ReviewResult != "" {
-		if info.ReviewResult, err = dp.NewPackageReviewResult(do.ReviewResult); err != nil {
 			return
 		}
 	}

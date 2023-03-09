@@ -7,6 +7,7 @@ import (
 	"github.com/opensourceways/software-package-server/common/infrastructure/postgresql"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/repository"
+	"github.com/opensourceways/software-package-server/utils"
 )
 
 // softwarePkgBasic
@@ -21,10 +22,15 @@ func (s softwarePkgBasic) SaveSoftwarePkg(pkg *domain.SoftwarePkgBasicInfo, vers
 	}
 
 	filter := SoftwarePkgBasicDO{Id: u, Version: version}
-	updates := s.toSoftwarePkgUpdate(pkg)
+	var do SoftwarePkgBasicDO
+	s.toSoftwarePkgBasicDO(pkg, &do)
 
-	if err = s.basicDBCli.UpdateRecord(&filter, updates); err != nil && s.basicDBCli.IsRowNotFound(err) {
-		err = commonrepo.NewErrorResourceNotFound(err)
+	do.UpdatedAt = utils.Now()
+	do.Id = u
+	do.Version = version + 1
+
+	if err = s.basicDBCli.UpdateRecord(&filter, &do); err != nil && s.basicDBCli.IsRowNotFound(err) {
+		return commonrepo.NewErrorResourceNotFound(err)
 	}
 
 	return err
