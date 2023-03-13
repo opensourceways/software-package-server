@@ -15,7 +15,7 @@ import (
 const (
 	keyCookie                  = "_Y_G_"
 	keyUserInfo                = "user_info"
-	headerPrivateToken         = "PRIVATE-TOKEN"
+	headerPrivateToken         = "token"
 	errorBadRequestNoHeader    = "bad_request_no_token"
 	errorBadRequestNoCookie    = "bad_request_no_cookie"
 	errorBadRequestHaventLogin = "bad_request_havent_login"

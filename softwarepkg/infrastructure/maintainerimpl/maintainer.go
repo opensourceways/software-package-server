@@ -1,6 +1,7 @@
 package maintainerimpl
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -18,6 +19,12 @@ type sigPermission struct {
 	Data []struct {
 		Sig  string   `json:"sig"`
 		Type []string `json:"type"`
+	} `json:"data"`
+}
+
+type allSigPermission struct {
+	Data struct {
+		Data map[string]interface{} `json:"data"`
 	} `json:"data"`
 }
 
@@ -68,8 +75,18 @@ func (impl *maintainerImpl) HasPermission(info *domain.SoftwarePkgBasicInfo, use
 		return false, err
 	}
 
+	r, _, err := impl.cli.Download(req)
+	if err != nil {
+		return false, err
+	}
+
 	var res sigPermission
-	if _, err = impl.cli.ForwardTo(req, &res); err != nil {
+	var all allSigPermission
+	if err = json.Unmarshal(r, &res); err != nil {
+		if err = json.Unmarshal(r, &all); err == nil {
+			return false, nil
+		}
+
 		return false, err
 	}
 
