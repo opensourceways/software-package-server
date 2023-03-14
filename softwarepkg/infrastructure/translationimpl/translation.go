@@ -1,112 +1,81 @@
 package translationimpl
 
 import (
-	"fmt"
-	"net/http"
-	"strings"
+	"errors"
 
-	"github.com/opensourceways/community-robot-lib/utils"
+	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core"
+	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core/auth/basic"
+	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core/region"
+	v2 "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/nlp/v2"
+	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/nlp/v2/model"
 
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
 func NewTranslationService(cfg *Config) service {
+	auth := basic.NewCredentialsBuilder().
+		WithAk(cfg.AccessKey).
+		WithSk(cfg.SecretKey).
+		WithProjectId(cfg.Project).
+		Build()
+
+	client := v2.NewNlpClient(core.NewHcHttpClientBuilder().
+		WithCredential(auth).
+		WithRegion(region.NewRegion(cfg.Region, cfg.AuthEndpoint...)).
+		Build())
+
 	return service{
-		cli: utils.NewHttpClient(3),
-		cfg: *cfg,
+		cli:  client,
+		from: model.GetTextTranslationReqFromEnum(),
+		to:   model.GetTextTranslationReqToEnum(),
 	}
 }
 
-type translation struct {
-	SrcText        string `json:"src_text"`
-	TranslatedText string `json:"translated_text"`
-	From           string `json:"from"`
-	To             string `json:"to"`
-}
-
 type service struct {
-	cli utils.HttpClient
-	cfg Config
+	cli  *v2.NlpClient
+	from model.TextTranslationReqFromEnum
+	to   model.TextTranslationReqToEnum
 }
 
-func (s service) token() (string, error) {
-	return gentoken(&s.cfg.Cloud)
+func (s service) reqFrom(from string) model.TextTranslationReqFrom {
+	switch from {
+	case "zh":
+		return s.from.ZH
+	case "en":
+		return s.from.EN
+	default:
+		return s.from.AUTO
+	}
 }
 
-func gentoken(cfg *CloudConfig) (string, error) {
-	str := `
-{ 
-    "auth": { 
-        "identity": { 
-            "methods": [ 
-                "password" 
-            ], 
-            "password": { 
-                "user": { 
-                    "name": "%s", 
-                    "password": "%s", 
-                    "domain": { 
-                        "name": "%s" 
-                    } 
-                } 
-            } 
-        }, 
-        "scope": { 
-            "project": { 
-                "name": "%s" 
-            } 
-        } 
-    } 
+func (s service) reqTo(to string) model.TextTranslationReqTo {
+	switch to {
+	case "zh":
+		return s.to.ZH
+	case "en":
+		return s.to.EN
+	default:
+		return s.to.EN
+	}
 }
-`
-	body := fmt.Sprintf(
-		str, cfg.User, cfg.Password, cfg.Domain, cfg.Project,
-	)
 
-	resp, err := http.Post(
-		cfg.AuthEndpoint, "application/json",
-		strings.NewReader(body),
-	)
+func (s service) Translate(content string, l dp.Language) (string, error) {
+	t := model.TextTranslationReq{
+		Text: content,
+		From: s.reqFrom(""),
+		To:   s.reqTo(l.Language()),
+	}
+
+	req := model.RunTextTranslationRequest{Body: &t}
+
+	v, err := s.cli.RunTextTranslation(&req)
 	if err != nil {
 		return "", err
 	}
 
-	t := resp.Header.Get("X-Subject-Token")
-
-	resp.Body.Close()
-
-	return t, nil
-}
-
-func (s service) Translation(content dp.ReviewComment, from, to string) (text string, err error) {
-	str := `
-{
-    "text":"%s",
-    "from":"%s",
-    "to":"%s"
-}
-`
-	body := fmt.Sprintf(str, content.ReviewComment(), from, to)
-
-	token, err := s.token()
-	if err != nil {
-		return
+	if v.ErrorMsg != nil && *v.ErrorMsg != "" {
+		err = errors.New(*v.ErrorMsg)
 	}
 
-	req, err := http.NewRequest(
-		http.MethodPost, s.cfg.TranslationURL, strings.NewReader(body),
-	)
-	if err != nil {
-		return
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Auth-Token", token)
-
-	var res translation
-	if _, err = s.cli.ForwardTo(req, &res); err != nil {
-		return
-	}
-
-	return res.TranslatedText, nil
+	return *v.TranslatedText, err
 }
