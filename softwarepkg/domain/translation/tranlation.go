@@ -1,4 +1,4 @@
-package translating
+package translation
 
 import "github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 

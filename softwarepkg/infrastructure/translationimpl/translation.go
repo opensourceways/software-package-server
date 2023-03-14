@@ -21,38 +21,25 @@ func NewTranslationService(cfg *Config) service {
 
 	client := v2.NewNlpClient(core.NewHcHttpClientBuilder().
 		WithCredential(auth).
-		WithRegion(region.NewRegion(cfg.Region, cfg.AuthEndpoint...)).
+		WithRegion(region.NewRegion(cfg.Region, cfg.AuthEndpoint)).
 		Build())
 
 	return service{
-		cli:  client,
-		from: model.GetTextTranslationReqFromEnum(),
-		to:   model.GetTextTranslationReqToEnum(),
+		cli: client,
+		to:  model.GetTextTranslationReqToEnum(),
 	}
 }
 
 type service struct {
-	cli  *v2.NlpClient
-	from model.TextTranslationReqFromEnum
-	to   model.TextTranslationReqToEnum
-}
-
-func (s service) reqFrom(from string) model.TextTranslationReqFrom {
-	switch from {
-	case "zh":
-		return s.from.ZH
-	case "en":
-		return s.from.EN
-	default:
-		return s.from.AUTO
-	}
+	cli *v2.NlpClient
+	to  model.TextTranslationReqToEnum
 }
 
 func (s service) reqTo(to string) model.TextTranslationReqTo {
 	switch to {
-	case "zh":
+	case "chinese":
 		return s.to.ZH
-	case "en":
+	case "english":
 		return s.to.EN
 	default:
 		return s.to.EN
@@ -62,7 +49,7 @@ func (s service) reqTo(to string) model.TextTranslationReqTo {
 func (s service) Translate(content string, l dp.Language) (string, error) {
 	t := model.TextTranslationReq{
 		Text: content,
-		From: s.reqFrom(""),
+		From: model.GetTextTranslationReqFromEnum().AUTO,
 		To:   s.reqTo(l.Language()),
 	}
 
@@ -73,9 +60,14 @@ func (s service) Translate(content string, l dp.Language) (string, error) {
 		return "", err
 	}
 
-	if v.ErrorMsg != nil && *v.ErrorMsg != "" {
+	if v.ErrorMsg != nil {
 		err = errors.New(*v.ErrorMsg)
+		return "", err
 	}
 
-	return *v.TranslatedText, err
+	if v.TranslatedText != nil {
+		return *v.TranslatedText, nil
+	}
+
+	return "", errors.New("no translated text")
 }
