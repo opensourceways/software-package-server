@@ -62,14 +62,9 @@ func initSoftwarePkgService(v1 *gin.RouterGroup, cfg *config.Config) {
 
 	maintainer := maintainerimpl.NewMaintainerImpl(&cfg.Maintainer)
 
-	translation, err := translationimpl.NewTranslationService(&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages)
-	if err != nil {
-		logrus.Fatalf("init translation err:%v", err)
-	}
-
 	controller.AddRouteForSoftwarePkgController(
 		v1, softwarepkgapp.NewSoftwarePkgService(
-			repo, messageimpl.Producer(), maintainer, translation,
+			repo, messageimpl.Producer(), maintainer, translationimpl.Translation(),
 		),
 	)
 }

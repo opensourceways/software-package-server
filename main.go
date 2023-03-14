@@ -14,6 +14,7 @@ import (
 	"github.com/opensourceways/software-package-server/server"
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/messageimpl"
+	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/translationimpl"
 )
 
 type options struct {
@@ -70,6 +71,12 @@ func main() {
 	// MQ
 	if err = messageimpl.Init(&cfg.MQ, log); err != nil {
 		logrus.Fatalf("init mq, err:%s", err.Error())
+	}
+
+	if err = translationimpl.NewTranslationService(
+		&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages,
+	); err != nil {
+		logrus.Fatalf("init translation err:%v", err)
 	}
 
 	defer messageimpl.Exit()

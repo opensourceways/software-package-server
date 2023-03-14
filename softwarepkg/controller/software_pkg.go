@@ -27,7 +27,7 @@ func AddRouteForSoftwarePkgController(r *gin.RouterGroup, pkgService app.Softwar
 	r.PUT("/v1/softwarepkg/:id/review/reject", m, ctl.Reject)
 	r.PUT("/v1/softwarepkg/:id/review/abandon", m, ctl.Abandon)
 	r.POST("/v1/softwarepkg/:id/review/comment", m, ctl.NewReviewComment)
-	r.GET("/v1/softwarepkg/translate/review/comment", m, ctl.TranslateReviewComment)
+	r.GET("/v1/softwarepkg/:id/review/comment/:cid/translate", m, ctl.TranslateReviewComment)
 }
 
 // ApplyNewPkg
@@ -235,12 +235,12 @@ func (ctl SoftwarePkgController) NewReviewComment(ctx *gin.Context) {
 // @Description get translate review comment
 // @Tags  SoftwarePkg
 // @Accept json
-// @Param    pkg_id         query	 string   true    "pkg_id of software package"
-// @Param    comment_id     query	 string   true    "comment_id of review comment"
-// @Param    language       query	 int      true    "language"
+// @Param    id         	path	 string   true    "id of software package"
+// @Param    cid     		path	 string   true    "cid of review comment"
+// @Param    language       query	 string   true    "language"
 // @Success 200 {object} app.TranslatedReveiwCommentDTO
 // @Failure 400 {object} ResponseData
-// @Router /v1/softwarepkg/translate/review/comment [get]
+// @Router /v1/softwarepkg/{id}/review/comment/{cid}/translate [get]
 func (ctl SoftwarePkgController) TranslateReviewComment(ctx *gin.Context) {
 	var req translationCommentQuery
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -249,7 +249,7 @@ func (ctl SoftwarePkgController) TranslateReviewComment(ctx *gin.Context) {
 		return
 	}
 
-	cmd, err := req.toCmd()
+	cmd, err := req.toCmd(ctx.Param("id"), ctx.Param("cid"))
 	if err != nil {
 		commonctl.SendBadRequestParam(ctx, err)
 
