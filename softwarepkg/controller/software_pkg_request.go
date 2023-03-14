@@ -110,11 +110,11 @@ func (r reviewCommentRequest) toCmd(user *domain.User) (rc app.CmdToWriteSoftwar
 	return
 }
 
-type translationCommentQuery struct {
-	Language string `json:"language"     form:"language"`
+type translationCommentRequest struct {
+	Language string `json:"language"`
 }
 
-func (t translationCommentQuery) toCmd(pkgId, commentId string) (cmd app.CmdToTranslateReviewComment, err error) {
+func (t translationCommentRequest) toCmd(pkgId, commentId string) (cmd app.CmdToTranslateReviewComment, err error) {
 	cmd.PkgId = pkgId
 	cmd.CommentId = commentId
 	cmd.Language, err = dp.NewLanguage(t.Language)

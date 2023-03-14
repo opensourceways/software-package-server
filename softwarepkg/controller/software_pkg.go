@@ -231,19 +231,19 @@ func (ctl SoftwarePkgController) NewReviewComment(ctx *gin.Context) {
 }
 
 // TranslateReviewComment
-// @Summary get translate review comment
-// @Description get translate review comment
+// @Summary translate review comment
+// @Description translate review comment
 // @Tags  SoftwarePkg
 // @Accept json
-// @Param    id             path	 string   true    "id of software package"
-// @Param    cid            path	 string   true    "cid of review comment"
-// @Param    language       query	 string   true    "language"
+// @Param    id       path       string                      true    "id of software package"
+// @Param    cid      path       string                      true    "cid of review comment"
+// @Param    param    body       translationCommentRequest   true    "body of translate review comment"
 // @Success 201 {object} app.TranslatedReveiwCommentDTO
 // @Failure 400 {object} ResponseData
 // @Router /v1/softwarepkg/{id}/review/comment/{cid}/translate [post]
 func (ctl SoftwarePkgController) TranslateReviewComment(ctx *gin.Context) {
-	var req translationCommentQuery
-	if err := ctx.ShouldBindQuery(&req); err != nil {
+	var req translationCommentRequest
+	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		commonctl.SendBadRequestParam(ctx, err)
 
 		return

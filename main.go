@@ -68,17 +68,18 @@ func main() {
 		logrus.Fatalf("init db, err:%s", err.Error())
 	}
 
+	// Translation
+	err = translationimpl.Init(&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages)
+	if err != nil {
+		logrus.Fatalf("init translation err:%v", err)
+	}
+
 	// MQ
 	if err = messageimpl.Init(&cfg.MQ, log); err != nil {
 		logrus.Fatalf("init mq, err:%s", err.Error())
 	}
 
 	defer messageimpl.Exit()
-
-	// Translation
-	if err = translationimpl.Init(&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages); err != nil {
-		logrus.Fatalf("init translation err:%v", err)
-	}
 
 	// Domain
 	dp.Init(&cfg.SoftwarePkg)

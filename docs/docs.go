@@ -254,14 +254,14 @@ const docTemplate = `{
         },
         "/v1/softwarepkg/{id}/review/comment/{cid}/translate": {
             "post": {
-                "description": "get translate review comment",
+                "description": "translate review comment",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "SoftwarePkg"
                 ],
-                "summary": "get translate review comment",
+                "summary": "translate review comment",
                 "parameters": [
                     {
                         "type": "string",
@@ -278,11 +278,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "language",
-                        "name": "language",
-                        "in": "query",
-                        "required": true
+                        "description": "body of translate review comment",
+                        "name": "parm",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.translationCommentRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -521,6 +523,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.translationCommentRequest": {
+            "type": "object",
+            "properties": {
+                "language": {
                     "type": "string"
                 }
             }

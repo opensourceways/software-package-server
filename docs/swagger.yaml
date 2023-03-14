@@ -123,6 +123,11 @@ definitions:
     - sig
     - source_code
     type: object
+  controller.translationCommentRequest:
+    properties:
+      language:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -285,7 +290,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: get translate review comment
+      description: translate review comment
       parameters:
       - description: id of software package
         in: path
@@ -297,11 +302,12 @@ paths:
         name: cid
         required: true
         type: string
-      - description: language
-        in: query
-        name: language
+      - description: body of translate review comment
+        in: body
+        name: parm
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/controller.translationCommentRequest'
       responses:
         "201":
           description: Created
@@ -311,7 +317,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.ResponseData'
-      summary: get translate review comment
+      summary: translate review comment
       tags:
       - SoftwarePkg
   /v1/softwarepkg/{id}/review/reject:
