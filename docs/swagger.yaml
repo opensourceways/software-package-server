@@ -282,7 +282,7 @@ paths:
       tags:
       - SoftwarePkg
   /v1/softwarepkg/{id}/review/comment/{cid}/translate:
-    get:
+    post:
       consumes:
       - application/json
       description: get translate review comment
@@ -303,8 +303,8 @@ paths:
         required: true
         type: string
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/app.TranslatedReveiwCommentDTO'
         "400":

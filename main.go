@@ -73,13 +73,12 @@ func main() {
 		logrus.Fatalf("init mq, err:%s", err.Error())
 	}
 
-	if err = translationimpl.NewTranslationService(
-		&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages,
-	); err != nil {
+	defer messageimpl.Exit()
+
+	// Translation
+	if err = translationimpl.Init(&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages); err != nil {
 		logrus.Fatalf("init translation err:%v", err)
 	}
-
-	defer messageimpl.Exit()
 
 	// Domain
 	dp.Init(&cfg.SoftwarePkg)

@@ -253,7 +253,7 @@ const docTemplate = `{
             }
         },
         "/v1/softwarepkg/{id}/review/comment/{cid}/translate": {
-            "get": {
+            "post": {
                 "description": "get translate review comment",
                 "consumes": [
                     "application/json"
@@ -286,8 +286,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/app.TranslatedReveiwCommentDTO"
                         }
