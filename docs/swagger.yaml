@@ -78,6 +78,11 @@ definitions:
       total:
         type: integer
     type: object
+  app.TranslatedReveiwCommentDTO:
+    properties:
+      content:
+        type: string
+    type: object
   controller.ResponseData:
     properties:
       code:
@@ -297,6 +302,39 @@ paths:
           schema:
             $ref: '#/definitions/controller.ResponseData'
       summary: reject software package
+      tags:
+      - SoftwarePkg
+  /v1/softwarepkg/translate/review/comment:
+    get:
+      consumes:
+      - application/json
+      description: get translate review comment
+      parameters:
+      - description: pkg_id of software package
+        in: query
+        name: pkg_id
+        required: true
+        type: string
+      - description: comment_id of review comment
+        in: query
+        name: comment_id
+        required: true
+        type: string
+      - description: language
+        in: query
+        name: language
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.TranslatedReveiwCommentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseData'
+      summary: get translate review comment
       tags:
       - SoftwarePkg
 swagger: "2.0"

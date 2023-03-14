@@ -91,6 +91,55 @@
                 }
             }
         },
+        "/v1/softwarepkg/translate/review/comment": {
+            "get": {
+                "description": "get translate review comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SoftwarePkg"
+                ],
+                "summary": "get translate review comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "pkg_id of software package",
+                        "name": "pkg_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment_id of review comment",
+                        "name": "comment_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "language",
+                        "name": "language",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.TranslatedReveiwCommentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/softwarepkg/{id}": {
             "get": {
                 "description": "get software package",
@@ -395,6 +444,14 @@
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "app.TranslatedReveiwCommentDTO": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
                 }
             }
         },

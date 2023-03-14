@@ -18,6 +18,7 @@ import (
 	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/maintainerimpl"
 	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/messageimpl"
 	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/repositoryimpl"
+	"github.com/opensourceways/software-package-server/softwarepkg/infrastructure/translationimpl"
 )
 
 func StartWebServer(port int, timeout time.Duration, cfg *config.Config) {
@@ -61,9 +62,14 @@ func initSoftwarePkgService(v1 *gin.RouterGroup, cfg *config.Config) {
 
 	maintainer := maintainerimpl.NewMaintainerImpl(&cfg.Maintainer)
 
+	translation, err := translationimpl.NewTranslationService(&cfg.Translation, cfg.SoftwarePkg.SupportedLanguages)
+	if err != nil {
+		logrus.Fatalf("init translation err:%v", err)
+	}
+
 	controller.AddRouteForSoftwarePkgController(
 		v1, softwarepkgapp.NewSoftwarePkgService(
-			repo, messageimpl.Producer(), maintainer,
+			repo, messageimpl.Producer(), maintainer, translation,
 		),
 	)
 }

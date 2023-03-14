@@ -104,8 +104,22 @@ type reviewCommentRequest struct {
 
 func (r reviewCommentRequest) toCmd(user *domain.User) (rc app.CmdToWriteSoftwarePkgReviewComment, err error) {
 	rc.Author = user.Account
-	
+
 	rc.Content, err = dp.NewReviewComment(r.Comment)
+
+	return
+}
+
+type translationCommentQuery struct {
+	PkgId     string `json:"pkg_id"       form:"pkg_id"`
+	CommentId string `json:"comment_id"   form:"comment_id"`
+	Language  string `json:"language"     form:"language"`
+}
+
+func (t translationCommentQuery) toCmd() (cmd app.CmdToTranslateReviewComment, err error) {
+	cmd.PkgId = t.PkgId
+	cmd.CommentId = t.CommentId
+	cmd.Language, err = dp.NewLanguage(t.Language)
 
 	return
 }
