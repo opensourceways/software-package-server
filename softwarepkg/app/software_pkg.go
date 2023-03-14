@@ -47,7 +47,7 @@ type softwarePkgService struct {
 	repo         repository.SoftwarePkg
 	message      message.SoftwarePkgMessage
 	maintainer   maintainer.Maintainer
-	translating  translation.Translating
+	translation  translation.Translation
 	reviewServie service.SoftwarePkgReviewService
 }
 

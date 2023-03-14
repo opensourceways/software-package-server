@@ -12,7 +12,7 @@ import (
 	"github.com/opensourceways/software-package-server/softwarepkg/domain/dp"
 )
 
-func NewTranslationService(cfg *Config) service {
+func NewTranslationService(cfg *Config, languages []string) service {
 	auth := basic.NewCredentialsBuilder().
 		WithAk(cfg.AccessKey).
 		WithSk(cfg.SecretKey).
@@ -23,6 +23,8 @@ func NewTranslationService(cfg *Config) service {
 		WithCredential(auth).
 		WithRegion(region.NewRegion(cfg.Region, cfg.AuthEndpoint)).
 		Build())
+
+	initMap(languages)
 
 	return service{
 		cli: client,
@@ -35,22 +37,22 @@ type service struct {
 	to  model.TextTranslationReqToEnum
 }
 
-func (s service) reqTo(to string) model.TextTranslationReqTo {
-	switch to {
-	case "chinese":
-		return s.to.ZH
-	case "english":
-		return s.to.EN
-	default:
-		return s.to.EN
-	}
+func (s service) reqTo(l dp.Language) (t model.TextTranslationReqTo, ok bool) {
+	t, ok = textTranslationTo[l.Language()]
+
+	return
 }
 
 func (s service) Translate(content string, l dp.Language) (string, error) {
+	to, ok := s.reqTo(l)
+	if !ok {
+		return "", errors.New("no textTranslationReqTo")
+	}
+
 	t := model.TextTranslationReq{
 		Text: content,
 		From: model.GetTextTranslationReqFromEnum().AUTO,
-		To:   s.reqTo(l.Language()),
+		To:   to,
 	}
 
 	req := model.RunTextTranslationRequest{Body: &t}
@@ -62,6 +64,7 @@ func (s service) Translate(content string, l dp.Language) (string, error) {
 
 	if v.ErrorMsg != nil {
 		err = errors.New(*v.ErrorMsg)
+
 		return "", err
 	}
 
