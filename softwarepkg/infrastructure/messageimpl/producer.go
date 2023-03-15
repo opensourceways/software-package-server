@@ -16,7 +16,7 @@ type producer struct {
 }
 
 func (p *producer) NotifyPkgApplied(e message.EventMessage) error {
-	return send(p.topics.ApplyingSoftwarePkg, e)
+	return send(p.topics.NewSoftwarePkg, e)
 }
 
 func (p *producer) NotifyPkgApproved(e message.EventMessage) error {
@@ -33,6 +33,10 @@ func (p *producer) NotifyPkgAbandoned(e message.EventMessage) error {
 
 func (p *producer) NotifyPkgAlreadyClosed(e message.EventMessage) error {
 	return send(p.topics.AbandonedSoftwarePkg, e)
+}
+
+func (p *producer) NotifyPkgIndirectlyApproved(e message.EventMessage) error {
+	return send(p.topics.IndirectlyApprovedSoftwarePkg, e)
 }
 
 func send(topic string, v message.EventMessage) error {
